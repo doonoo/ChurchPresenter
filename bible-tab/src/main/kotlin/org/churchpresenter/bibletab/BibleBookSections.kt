@@ -1,8 +1,19 @@
 package org.churchpresenter.bibletab
 
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import org.churchpresenter.bible.CanonSection
+import org.churchpresenter.sharedui.composables.rowPad
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.bible_section_deuterocanon
 import org.churchpresenter.strings.generated.resources.bible_section_new_testament
@@ -64,4 +75,20 @@ internal fun bookSectionLabels(): (CanonSection?) -> String {
             null -> other
         }
     }
+}
+
+/** A section's name above its first row: small, quiet, and not a thing to click. */
+@Composable
+internal fun BibleSectionHeading(text: String, first: Boolean) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelSmall,
+        fontWeight = FontWeight.SemiBold,
+        color = MaterialTheme.colorScheme.primary,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.fillMaxWidth()
+            .semantics { heading() }
+            .padding(start = rowPad(10.dp), top = if (first) 2.dp else 10.dp, bottom = 2.dp),
+    )
 }

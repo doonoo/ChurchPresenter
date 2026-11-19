@@ -6,6 +6,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -58,6 +59,23 @@ class BibleImportTest {
         val spb = out.readText()
         assertTrue(spb.lines().any { it.startsWith("103\t") }, "the book header names Jubilees' number")
         assertTrue(spb.contains("B103C001V001"), "the verse carries its canon code")
+    }
+
+    @Test
+    fun `a broken xml file stays XML so its parse error is reported`() {
+        val broken = file("bad.xml", "this is not xml")
+
+        assertEquals(BibleImport.Format.ZEFANIA, BibleImport.detect(broken))
+        assertFailsWith<Exception> { BibleImport.parse(broken) }
+    }
+
+    @Test
+    fun `a text file with no numbered verses is refused rather than written empty`() {
+        val error = assertFailsWith<IllegalArgumentException> {
+            BibleImport.parse(file("notes.txt", "Just a preface.\nNothing numbered."))
+        }
+
+        assertTrue(error.message.orEmpty().contains("notes.txt"))
     }
 
     @Test

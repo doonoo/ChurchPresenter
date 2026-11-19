@@ -315,6 +315,7 @@ class BibleViewModel(
 
         internal const val MAX_DETECTED = 20
         internal const val DETECTION_DEDUPE_WINDOW = 32
+
         /**
          * Every book's standard English name in lower case, with its number: the 66, then the
          * deuterocanon and the lost books. The search box reads a typed book against these as well
