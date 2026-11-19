@@ -10,6 +10,7 @@ internal object DictionaryText {
     private val BREAK_TAG = Regex("(?i)<\\s*(br|/p|/div|/li|/h[1-6]|/tr)\\b[^>]*>")
     private val ANY_TAG = Regex("<[^>]*>")
     private val NUMERIC_ENTITY = Regex("&#(x?)([0-9a-fA-F]+);")
+    private val ANY_ENTITY = Regex("&(#x?[0-9a-fA-F]+|[a-zA-Z]+);")
     private val NAMED_ENTITIES = mapOf(
         "&amp;" to "&", "&lt;" to "<", "&gt;" to ">", "&quot;" to "\"", "&apos;" to "'", "&#39;" to "'",
         "&nbsp;" to " ", "&mdash;" to "—", "&ndash;" to "–", "&hellip;" to "…",
@@ -28,7 +29,7 @@ internal object DictionaryText {
     /** [raw] as plain text, whichever of HTML or RTF it is written in. */
     fun clean(raw: String): String = when {
         raw.trimStart().startsWith("{\\") || raw.contains("\\par") -> fromRtf(raw)
-        raw.contains('<') && raw.contains('>') -> fromHtml(raw)
+        (raw.contains('<') && raw.contains('>')) || ANY_ENTITY.containsMatchIn(raw) -> fromHtml(raw)
         else -> tidy(raw)
     }
 
@@ -55,7 +56,9 @@ internal object DictionaryText {
     private fun decodeEntities(text: String): String {
         var out = text.replace(NUMERIC_ENTITY) { m ->
             val radix = if (m.groupValues[1].isEmpty()) 10 else HEX_RADIX
-            m.groupValues[2].toIntOrNull(radix)?.let { String(Character.toChars(it)) } ?: m.value
+            // A code past Unicode's range is left as written rather than failing the whole import.
+            m.groupValues[2].toIntOrNull(radix)?.takeIf(Character::isValidCodePoint)
+                ?.let { String(Character.toChars(it)) } ?: m.value
         }
         NAMED_ENTITIES.forEach { (entity, value) -> out = out.replace(entity, value) }
         return out

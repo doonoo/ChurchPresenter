@@ -70,6 +70,23 @@ class DictionaryPresenterRenderTest {
     }
 
     @Test
+    fun `an imported entry names its dictionary and never shows its key`() = runDict(
+        StrongsEntry(
+            number = "dict-eastons:Abba", word = "Abba", transliteration = "", pronunciation = "",
+            definition = "Father.", source = "Easton's Bible Dictionary",
+        ),
+    ) {
+        onNodeWithText("Easton's Bible Dictionary", substring = true)
+            .assertExists("the reference line names the dictionary")
+        onNodeWithText("dict-eastons", substring = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun `a lexicon entry shows its number and its lexicon`() = runDict(elohim.copy(source = "BDB")) {
+        onNodeWithText("H430 · BDB", substring = true).assertExists()
+    }
+
+    @Test
     fun `no entry leaves the screen blank`() = runDict(entry = null) {
         onNodeWithText("ʼĕlôhîym", substring = true)
             .assertDoesNotExist()
