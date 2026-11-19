@@ -1,5 +1,11 @@
 package org.churchpresenter.profiles
 
+import org.churchpresenter.bible.BibleCanon
+import org.churchpresenter.bible.CanonSection
+import org.churchpresenter.strings.generated.resources.bible_section_deuterocanon
+import org.churchpresenter.strings.generated.resources.bible_section_nt_apocrypha
+import org.churchpresenter.strings.generated.resources.bible_section_ot_pseudepigrapha
+import org.churchpresenter.strings.generated.resources.bible_section_other
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -156,24 +162,54 @@ internal fun BookList(
         }
         return
     }
-    val (oldTestament, newTestament) = ids.partition { it <= OLD_TESTAMENT_BOOKS }
-    val oldTitle = stringResource(Res.string.book_names_old_testament)
-    val newTitle = stringResource(Res.string.book_names_new_testament)
+    val sectionTitle = bookSectionTitles()
+    // The 66 under their testaments; each book past them under its canon section, in the order
+    // sections first appear -- the Apocrypha, the lost books, the New Testament apocrypha.
+    val groups = ids.groupBy { id ->
+        when {
+            id <= OLD_TESTAMENT_BOOKS -> sectionTitle(CanonSection.OLD_TESTAMENT)
+            id <= BOOK_COUNT -> sectionTitle(CanonSection.NEW_TESTAMENT)
+            else -> sectionTitle(BibleCanon.sectionOf(id))
+        }
+    }
     LazyColumn(modifier = modifier.fillMaxWidth().padding(horizontal = 18.dp)) {
-        listOf(oldTitle to oldTestament, newTitle to newTestament).forEach { (title, books) ->
+        groups.forEach { (title, books) ->
             if (books.isNotEmpty()) {
                 item(key = title) { ColumnCaption(title, Modifier.padding(start = 8.dp, top = 10.dp, bottom = 4.dp)) }
                 items(books, key = { it }) { id ->
+                    // A book the canon does not list is known only by the name its file gives it.
+                    val shownName = titles.localizedOf(id).ifBlank { fileNames[id].orEmpty() }
                     BookRow(
                         id = id,
                         fileName = fileNames[id],
-                        englishName = titles.englishOf(id),
-                        localizedName = titles.localizedOf(id),
+                        englishName = titles.englishOf(id).ifBlank { shownName },
+                        localizedName = shownName,
                         override = draft[id],
                         onEdit = { typed -> onEdit(id, typed) },
                     )
                 }
             }
+        }
+    }
+}
+
+/** The heading over each group of books: the testaments' own, then the Bible tab's section names. */
+@Composable
+private fun bookSectionTitles(): (CanonSection?) -> String {
+    val old = stringResource(Res.string.book_names_old_testament)
+    val new = stringResource(Res.string.book_names_new_testament)
+    val deutero = stringResource(Res.string.bible_section_deuterocanon)
+    val lost = stringResource(Res.string.bible_section_ot_pseudepigrapha)
+    val ntApocrypha = stringResource(Res.string.bible_section_nt_apocrypha)
+    val other = stringResource(Res.string.bible_section_other)
+    return { section ->
+        when (section) {
+            CanonSection.OLD_TESTAMENT -> old
+            CanonSection.NEW_TESTAMENT -> new
+            CanonSection.DEUTEROCANON -> deutero
+            CanonSection.OT_PSEUDEPIGRAPHA -> lost
+            CanonSection.NT_APOCRYPHA -> ntApocrypha
+            null -> other
         }
     }
 }

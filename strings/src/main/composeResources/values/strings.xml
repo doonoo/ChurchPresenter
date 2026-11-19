@@ -595,6 +595,7 @@
     <string name="book_names_failed_title">This Bible file could not be read.</string>
     <string name="book_names_failed_text">Its book names could not be extracted, so English names are listed. You can still set your own.</string>
     <string name="book_names_filter_all">All</string>
+    <string name="book_names_filter_extra">Apocrypha &amp; lost books</string>
     <string name="book_names_old_testament">Old Testament</string>
     <string name="book_names_new_testament">New Testament</string>
     <string name="bible_section_old_testament">Old Testament</string>
