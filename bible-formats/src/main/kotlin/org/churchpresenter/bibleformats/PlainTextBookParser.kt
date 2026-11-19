@@ -37,7 +37,7 @@ object PlainTextBookParser {
 
     fun parse(lines: List<String>, bookName: String, name: String = bookName, language: String? = null): ParsedBible {
         val collector = Collector(bookName)
-        lines.map { it.trim().trimStart('﻿') }.filter { it.isNotEmpty() }.forEach { collector.line(it) }
+        lines.map { it.trim().trimStart('\uFEFF') }.filter { it.isNotEmpty() }.forEach { collector.line(it) }
         return ParsedBible(
             name = name,
             description = "",

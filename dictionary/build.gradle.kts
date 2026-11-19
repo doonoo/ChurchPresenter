@@ -23,6 +23,8 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.swing)
     implementation(libs.kotlinx.serialization.json)
+    // MySword, MyBible and e-Sword dictionary modules are SQLite files.
+    implementation(libs.sqlite.jdbc)
 
     implementation(compose.desktop.currentOs)
     implementation(libs.compose.components.resources)

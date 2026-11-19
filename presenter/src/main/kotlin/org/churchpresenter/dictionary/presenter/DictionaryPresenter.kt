@@ -156,7 +156,7 @@ private fun DictionaryPresenterContent(
                     outline = ds.referenceOutline,
                     scaleFactor = 1f,
                     fillWidth = false,
-                    text = entry.number,
+                    text = entry.shownReference,
                     color = referenceColor,
                     fontSize = (ds.referenceFontSize * scale).sp,
                     fontFamily = refFontFamily,
@@ -295,7 +295,7 @@ private fun DictionaryPresenterContent(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) { content(scale) }
                 }
             }
-            val referenceText = entry.number + "\n" + translit
+            val referenceText = entry.shownReference + "\n" + translit
             Boxed(DICTIONARY_REFERENCE_BOX, showsReference, referenceText, ds.referenceFontSize) { scale ->
                 NumberPart(scale)
                 if (translit.isNotBlank()) TranslitPart(scale)

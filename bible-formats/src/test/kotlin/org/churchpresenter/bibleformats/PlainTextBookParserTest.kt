@@ -133,7 +133,7 @@ class PlainTextBookParserTest {
     fun `a file on disk with a byte order mark reads the same`() {
         val dir = Files.createTempDirectory("cp-plaintext-test").toFile()
         try {
-            val file = File(dir, "enoch.txt").apply { writeText("﻿1 The words of Enoch.") }
+            val file = File(dir, "enoch.txt").apply { writeText("\uFEFF1 The words of Enoch.") }
             val parsed = PlainTextBookParser.parse(file, "1 Enoch", name = "Enoch (Charles)", language = "eng")
 
             assertEquals(listOf("100 1:1 The words of Enoch."), parsed.refs())
