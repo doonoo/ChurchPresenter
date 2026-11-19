@@ -94,6 +94,9 @@ class ModelInvariantsTest {
             cls == Boolean::class -> (n + seed) % 2 == 0L
             cls == List::class -> {
                 val arg = type.arguments.firstOrNull()?.type ?: return emptyList<Any>()
+                // A model holding a list of itself (StrongsEntry.companions) is built one level
+                // deep: the inner one's own list is left empty, or building would never end.
+                if (arg.classifier in building) return emptyList<Any>()
                 listOf(valueOfType(arg, name, n, seed))
             }
             cls == Map::class -> {
@@ -119,10 +122,18 @@ class ModelInvariantsTest {
         val concrete = concreteOf(cls)
         val ctor = concrete.primaryConstructor ?: fail("${concrete.simpleName} has no primary constructor")
         ctor.isAccessible = true
-        return runCatching {
-            ctor.call(*ctor.parameters.map { valueFor(it, seed) }.toTypedArray())
-        }.getOrElse { fail("could not build ${concrete.qualifiedName}: $it") }
+        building.addLast(cls)
+        try {
+            return runCatching {
+                ctor.call(*ctor.parameters.map { valueFor(it, seed) }.toTypedArray())
+            }.getOrElse { fail("could not build ${concrete.qualifiedName}: $it") }
+        } finally {
+            building.removeLast()
+        }
     }
+
+    /** The models being built right now, outermost first — what a self-referencing list checks. */
+    private val building = ArrayDeque<KClass<*>>()
 
     private fun concreteOf(cls: KClass<*>): KClass<*> =
         if (!cls.isSealed && !cls.isAbstract) cls

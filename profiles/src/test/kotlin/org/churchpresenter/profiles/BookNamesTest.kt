@@ -190,7 +190,10 @@ class BookNamesTest {
 
     @Test
     fun `the extra books follow the sixty-six, with a renamed one no longer in the file`() {
-        assertEquals((1..BOOK_COUNT).toList() + listOf(69, 100, 104), allBookIds(listOf(100, 69), mapOf(104 to "Jasher")))
+        assertEquals(
+            (1..BOOK_COUNT).toList() + listOf(69, 100, 104),
+            allBookIds(listOf(100, 69), mapOf(104 to "Jasher")),
+        )
         assertEquals((1..BOOK_COUNT).toList(), allBookIds(emptyList(), mapOf(5 to "Devarim")))
     }
 
@@ -201,12 +204,14 @@ class BookNamesTest {
 
         assertEquals(listOf(69, 100), extra)
         assertEquals(BOOK_COUNT + 2, all.size)
-        assertTrue(bookIdsShown(BookNameFilter.NEW_TESTAMENT, "", emptyMap(), emptyMap(), titles, listOf(69)).none { it > BOOK_COUNT })
+        val newTestament = bookIdsShown(BookNameFilter.NEW_TESTAMENT, "", emptyMap(), emptyMap(), titles, listOf(69))
+        assertTrue(newTestament.none { it > BOOK_COUNT })
     }
 
     @Test
     fun `an extra book is found by its canon name`() {
-        assertEquals(listOf(100), bookIdsShown(BookNameFilter.ALL, "enoch", emptyMap(), emptyMap(), titles, listOf(100)))
+        val found = bookIdsShown(BookNameFilter.ALL, "enoch", emptyMap(), emptyMap(), titles, listOf(100))
+        assertEquals(listOf(100), found)
     }
 
     @Test
