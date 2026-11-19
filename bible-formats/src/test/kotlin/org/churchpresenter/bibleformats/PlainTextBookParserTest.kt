@@ -10,7 +10,8 @@ import kotlin.test.assertTrue
 /** [PlainTextBookParser] — a lost book typed out as text, in the shapes such files really come in. */
 class PlainTextBookParserTest {
 
-    private fun parse(text: String, book: String = "Jasher") = PlainTextBookParser.parse(text.trimIndent().lines(), book)
+    private fun parse(text: String, book: String = "Jasher") =
+        PlainTextBookParser.parse(text.trimIndent().lines(), book)
 
     private fun ParsedBible.refs(): List<String> = books.flatMap { b ->
         b.chapters.flatMap { c -> c.verses.map { "${b.number} ${c.number}:${it.number} ${it.text}" } }
@@ -51,7 +52,8 @@ class PlainTextBookParserTest {
             """
         )
 
-        assertEquals(listOf("104 12:1 First.", "104 12:2 Second.", "104 4:3 Third."), parsed.refs())
+        // Chapters come out in number order, whatever order the file wrote them in.
+        assertEquals(listOf("104 4:3 Third.", "104 12:1 First.", "104 12:2 Second."), parsed.refs())
     }
 
     @Test
@@ -72,7 +74,10 @@ class PlainTextBookParserTest {
             """
         )
 
-        assertEquals(listOf("104 1:1 And it came to pass that the earth was filled.", "104 1:2 And God saw."), parsed.refs())
+        assertEquals(
+            listOf("104 1:1 And it came to pass that the earth was filled.", "104 1:2 And God saw."),
+            parsed.refs(),
+        )
     }
 
     @Test

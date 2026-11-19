@@ -23,7 +23,8 @@ object PlainTextBookParser {
 
     private val BOOK_HEADING = Regex("""^(?:#+\s*|book\s*:\s*)(.+)$""", RegexOption.IGNORE_CASE)
     private val BOOK_OF_HEADING = Regex("""^(?:the\s+)?book\s+of\s+(.+)$""", RegexOption.IGNORE_CASE)
-    private val CHAPTER_HEADING = Regex("""^(?:chapter|chap\.?|ch\.?)\s+([0-9]+|[ivxlcdm]+)\b.*$""", RegexOption.IGNORE_CASE)
+    private val CHAPTER_HEADING =
+        Regex("""^(?:chapter|chap\.?|ch\.?)\s+([0-9]+|[ivxlcdm]+)\b.*$""", RegexOption.IGNORE_CASE)
     private val FULL_REFERENCE = Regex("""^(\d+)\s*:\s*(\d+)[.)]?\s+(.+)$""")
     private val VERSE = Regex("""^\[?(\d+)[\].)]?\s+(.+)$""")
 
@@ -85,19 +86,36 @@ object PlainTextBookParser {
         }
 
         fun line(line: String) {
-            BOOK_HEADING.matchEntire(line)?.let { return startBook(it.groupValues[1]) }
-            BOOK_OF_HEADING.matchEntire(line)?.takeIf { verse == null || BibleCanon.resolve(it.groupValues[1]) != null }
-                ?.let { return startBook(it.groupValues[1]) }
-            CHAPTER_HEADING.matchEntire(line)?.let { match ->
-                val token = match.groupValues[1]
-                (token.toIntOrNull() ?: romanToInt(token))?.let { chapter = it; verse = null; return }
+            if (!bookHeading(line) && !chapterHeading(line) && !verseLine(line)) verse?.append(' ')?.append(line)
+        }
+
+        /** A book heading: `# Name`, `Book: Name`, or `Book of Name` — which mid-verse must name a known book. */
+        private fun bookHeading(line: String): Boolean {
+            val name = BOOK_HEADING.matchEntire(line)?.groupValues?.get(1)
+                ?: BOOK_OF_HEADING.matchEntire(line)?.groupValues?.get(1)
+                    ?.takeIf { verse == null || BibleCanon.resolve(it) != null }
+                ?: return false
+            startBook(name)
+            return true
+        }
+
+        private fun chapterHeading(line: String): Boolean {
+            val token = CHAPTER_HEADING.matchEntire(line)?.groupValues?.get(1) ?: return false
+            val number = token.toIntOrNull() ?: romanToInt(token) ?: return false
+            chapter = number
+            verse = null
+            return true
+        }
+
+        private fun verseLine(line: String): Boolean {
+            FULL_REFERENCE.matchEntire(line)?.destructured?.let { (chapterText, number, text) ->
+                chapter = chapterText.toInt()
+                startVerse(number.toInt(), text)
+                return true
             }
-            FULL_REFERENCE.matchEntire(line)?.let { match ->
-                chapter = match.groupValues[1].toInt()
-                return startVerse(match.groupValues[2].toInt(), match.groupValues[3])
-            }
-            VERSE.matchEntire(line)?.let { return startVerse(it.groupValues[1].toInt(), it.groupValues[2]) }
-            verse?.append(' ')?.append(line)
+            val (number, text) = VERSE.matchEntire(line)?.destructured ?: return false
+            startVerse(number.toInt(), text)
+            return true
         }
 
         private fun startVerse(number: Int, text: String) {
@@ -116,7 +134,8 @@ object PlainTextBookParser {
             val built = byChapter.entries.sortedBy { it.key }.map { (chapterNumber, verses) ->
                 BibleChapter(
                     chapterNumber,
-                    verses.entries.sortedBy { it.key }.map { (n, text) -> BibleVerse(n, text.toString().normalizeSpace()) },
+                    verses.entries.sortedBy { it.key }
+                        .map { (n, text) -> BibleVerse(n, text.toString().normalizeSpace()) },
                 )
             }.filter { it.verses.isNotEmpty() }
             if (built.isEmpty()) null else BibleBook(number, name, built)

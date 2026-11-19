@@ -54,10 +54,11 @@ object BibleImport {
             runCatching {
                 val xml = factory.createXMLStreamReader(input)
                 try {
-                    while (xml.hasNext()) {
-                        if (xml.next() == XMLStreamConstants.START_ELEMENT) return@runCatching xml.localName
-                    }
-                    null
+                    // Past the prolog to the first element; a file with none throws at its end.
+                    do {
+                        val event = xml.next()
+                    } while (event != XMLStreamConstants.START_ELEMENT)
+                    xml.localName
                 } finally {
                     xml.close()
                 }

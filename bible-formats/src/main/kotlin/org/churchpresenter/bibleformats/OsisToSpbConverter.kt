@@ -108,14 +108,13 @@ object OsisToSpbConverter {
 
         private fun start(xml: XMLStreamReader) {
             val tag = xml.localName
-            // A title inside a verse is a heading set into the text, not part of it.
-            if (skipDepth > 0 || tag in SKIPPED || (tag == "title" && openVerse != null)) {
+            if (skips(tag)) {
                 skipDepth++
                 return
             }
             when (tag) {
                 "osisText" -> language = xml.attr("lang")?.substringBefore('-')
-                "title", "rights", "language" -> startField(tag, xml)
+                "title", "rights" -> startField(tag, xml)
                 "div" -> if (xml.attr("type") == "book") {
                     currentBook = xml.attr("osisID")?.substringBefore(' ')
                     bookTitleFor = currentBook
@@ -124,6 +123,10 @@ object OsisToSpbConverter {
             }
         }
 
+        /** Inside a skipped element, or entering one. A title inside a verse is a heading set into the text. */
+        private fun skips(tag: String): Boolean =
+            skipDepth > 0 || tag in SKIPPED || (tag == "title" && openVerse != null)
+
         private fun startField(tag: String, xml: XMLStreamReader) {
             pending.setLength(0)
             headerField = when {
@@ -131,7 +134,6 @@ object OsisToSpbConverter {
                     xml.attr("type") in setOf(null, "main") -> "bookTitle"
                 tag == "title" && workTitle == null && currentBook == null -> "workTitle"
                 tag == "rights" -> "rights"
-                tag == "language" && language == null -> "language"
                 else -> null
             }
         }
@@ -154,17 +156,16 @@ object OsisToSpbConverter {
             }
             when (tag) {
                 "verse" -> if (milestoneOpen) milestoneOpen = false else openVerse = null
-                "title", "rights", "language" -> endField()
+                "title", "rights" -> endField()
             }
         }
 
         private fun endField() {
             val value = pending.toString().normalizeSpace()
             when (headerField) {
-                "bookTitle" -> bookTitleFor?.let { if (value.isNotEmpty()) bookTitles.putIfAbsent(it, value) }
-                "workTitle" -> if (value.isNotEmpty()) workTitle = value
+                "bookTitle" -> currentBook?.takeIf { value.isNotEmpty() }?.let { bookTitles.putIfAbsent(it, value) }
+                "workTitle" -> workTitle = value.ifEmpty { null }
                 "rights" -> rights = value
-                "language" -> if (value.isNotEmpty()) language = value
             }
             if (headerField == "bookTitle") bookTitleFor = null
             headerField = null
@@ -177,11 +178,10 @@ object OsisToSpbConverter {
 
         /** The buffer for verse `Book.Chapter.Verse`, or null when [id] does not have that shape. */
         private fun verseFor(id: String): StringBuilder? {
-            val parts = id.split('.')
-            if (parts.size < OSIS_ID_PARTS) return null
-            val chapter = parts[1].toIntOrNull() ?: return null
-            val verse = parts[2].substringBefore('-').toIntOrNull() ?: return null
-            val number = bookNumbers.getOrPut(parts[0]) { bookNumberFor(parts[0]) ?: nextUnlisted++ }
+            val (book, chapterText, verseText) = OSIS_VERSE_ID.find(id)?.destructured ?: return null
+            val chapter = chapterText.toInt()
+            val verse = verseText.toInt()
+            val number = bookNumbers.getOrPut(book) { bookNumberFor(book) ?: nextUnlisted++ }
             return verses.getOrPut(number) { linkedMapOf() }
                 .getOrPut(chapter) { linkedMapOf() }
                 .getOrPut(verse) { StringBuilder() }
@@ -202,13 +202,15 @@ object OsisToSpbConverter {
                 BibleBook(number, shown, built)
             }
         }
-
-        private fun XMLStreamReader.attr(name: String): String? =
-            getAttributeValue(null, name)?.takeIf { it.isNotBlank() }
     }
 
-    private const val OSIS_ID_PARTS = 3
+    /** `Book.Chapter.Verse`, with a range's end (`Gen.1.3-4`) left off. */
+    private val OSIS_VERSE_ID = Regex("""^([^.]+)\.(\d+)\.(\d+)""")
 }
+
+/** An attribute's value, or null when it is missing or blank. */
+private fun XMLStreamReader.attr(name: String): String? =
+    getAttributeValue(null, name)?.takeIf { it.isNotBlank() }
 
 /** XML is line-wrapped, so verse text arrives full of newlines that mean nothing. */
 internal fun String.normalizeSpace(): String =

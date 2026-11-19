@@ -38,7 +38,8 @@ class OsisToSpbConverterTest {
     }
 
     private fun texts(parsed: ParsedBible, book: Int = parsed.books.first().number): List<String> =
-        parsed.books.first { it.number == book }.chapters.flatMap { c -> c.verses.map { "${c.number}:${it.number} ${it.text}" } }
+        parsed.books.first { it.number == book }.chapters
+            .flatMap { c -> c.verses.map { "${c.number}:${it.number} ${it.text}" } }
 
     @Test
     fun `container verses are read under their book chapter and verse`() {
@@ -74,7 +75,10 @@ class OsisToSpbConverterTest {
     @Test
     fun `a note inside a verse is not spliced into its text`() {
         val parsed = OsisToSpbConverter.parse(
-            osis("""<div type="book" osisID="Tob"><verse osisID="Tob.1.1">The book<note>a footnote</note> of Tobit</verse></div>""")
+            osis(
+                """<div type="book" osisID="Tob">
+                <verse osisID="Tob.1.1">The book<note>a footnote</note> of Tobit</verse></div>"""
+            )
         )
 
         assertEquals(listOf("1:1 The book of Tobit"), texts(parsed))
@@ -84,7 +88,10 @@ class OsisToSpbConverterTest {
     @Test
     fun `a heading inside a verse is left out`() {
         val parsed = OsisToSpbConverter.parse(
-            osis("""<div type="book" osisID="Jub"><verse osisID="Jub.1.1"><title>Heading</title>And it came to pass</verse></div>""")
+            osis(
+                """<div type="book" osisID="Jub">
+                <verse osisID="Jub.1.1"><title>Heading</title>And it came to pass</verse></div>"""
+            )
         )
 
         assertEquals(listOf("1:1 And it came to pass"), texts(parsed))
@@ -96,7 +103,8 @@ class OsisToSpbConverterTest {
             osis(
                 body = """<div type="book" osisID="Jasher"><title type="main">The Book of Jasher</title>
                 <verse osisID="Jasher.1.1">And God said</verse></div>""",
-                header = """<work osisWork="Test"><title>Lost Books Collection</title><rights>Public Domain</rights></work>""",
+                header = """<work osisWork="Test"><title>Lost Books Collection</title>
+                <rights>Public Domain</rights></work>""",
             )
         )
 
@@ -144,6 +152,67 @@ class OsisToSpbConverterTest {
 
         assertEquals("My Import", parsed.name)
         assertEquals("DEU", parsed.language)
+    }
+
+    @Test
+    fun `a milestone verse named only by its start id is still placed`() {
+        val parsed = OsisToSpbConverter.parse(
+            osis("""<div type="book" osisID="Sir"><verse sID="Sir.2.1"/>My son<verse eID="Sir.2.1"/></div>""")
+        )
+
+        assertEquals(listOf("2:1 My son"), texts(parsed))
+    }
+
+    @Test
+    fun `a verse with no id at all is not read into the one before it`() {
+        val parsed = OsisToSpbConverter.parse(
+            osis(
+                """<div type="book" osisID="Gen"><verse osisID="Gen.1.1">kept</verse>
+                <verse>nameless</verse></div>"""
+            )
+        )
+
+        assertEquals(listOf("1:1 kept"), texts(parsed))
+    }
+
+    @Test
+    fun `a chapter title does not rename the book and a book with no title takes its English name`() {
+        val parsed = OsisToSpbConverter.parse(
+            osis(
+                """<div type="book" osisID="1Macc"><title type="chapter">Chapter One</title>
+                <verse osisID="1Macc.1.1">After Alexander</verse></div>"""
+            )
+        )
+
+        assertEquals("1 Maccabees", parsed.books.single().name)
+    }
+
+    @Test
+    fun `a note inside a note is skipped as a whole and a book with no verses is left out`() {
+        val parsed = OsisToSpbConverter.parse(
+            osis(
+                """<div type="book" osisID="Bar"><title> </title></div>
+                <div type="book" osisID="Wis"><verse osisID="Wis.1.1">Love
+                <note>outer <note>inner</note> still note</note> righteousness</verse></div>"""
+            )
+        )
+
+        assertEquals(listOf(68), parsed.books.map { it.number })
+        assertEquals(listOf("1:1 Love righteousness"), texts(parsed))
+    }
+
+    @Test
+    fun `a file with no work title or language is named after itself`() {
+        val file = File(dir, "Jasher Gordon.xml").apply {
+            writeText(
+                """<osis><osisText><div type="book" osisID="Jasher">
+                <verse osisID="Jasher.1.1">x</verse></div></osisText></osis>"""
+            )
+        }
+        val parsed = OsisToSpbConverter.parse(file)
+
+        assertEquals("Jasher Gordon", parsed.name)
+        assertEquals(null, parsed.language)
     }
 
     @Test

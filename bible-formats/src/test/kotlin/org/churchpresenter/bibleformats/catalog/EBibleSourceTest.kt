@@ -157,8 +157,8 @@ class EBibleSourceTest {
 
     @Test
     fun `the published deuterocanon count says which translations carry the Apocrypha`() {
-        val header =
-            "languageCode,translationId,shortTitle,OTbooks,NTbooks,DCbooks,Copyright,Redistributable,downloadable,UpdateDate"
+        val header = "languageCode,translationId,shortTitle,OTbooks,NTbooks,DCbooks," +
+            "Copyright,Redistributable,downloadable,UpdateDate"
         val body = listOf(
             header,
             "eng,engwebu,World English Bible,39,27,0,PD,True,True,2020-01-01",

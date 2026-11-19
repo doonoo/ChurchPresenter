@@ -672,8 +672,8 @@ class Bible {
         /**
          * How far in to keep looking for header content: the `##` block plus a book list as long as
          * a module carrying the whole of [BibleCanon], with room to spare. The stop conditions below
-         * (`-----`, a verse line) are what normally ends the scan; this is the backstop for a module that has neither, where without it a
-         * "header scan" would read the whole multi-megabyte file.
+         * (`-----`, a verse line) are what normally ends the scan; this is the backstop for a module
+         * that has neither, where without it a "header scan" would read the whole multi-megabyte file.
          */
         const val HEADER_SCAN_LINE_LIMIT = 400
 

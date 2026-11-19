@@ -30,7 +30,8 @@ class BibleImportTest {
         <CHAPTER cnumber="1"><VERS vnumber="1">Zefania Tobit</VERS></CHAPTER></BIBLEBOOK></XMLBIBLE>"""
     private val osis = """<?xml version="1.0"?><osis><osisText><div type="book" osisID="Jub">
         <verse osisID="Jub.1.1">OSIS Jubilees</verse></div></osisText></osis>"""
-    private val usfx = """<?xml version="1.0"?><usfx><book id="ENO"><c id="1"/><v id="1"/>USFX Enoch<ve/></book></usfx>"""
+    private val usfx = """<?xml version="1.0"?><usfx>
+        <book id="ENO"><c id="1"/><v id="1"/>USFX Enoch<ve/></book></usfx>"""
 
     @Test
     fun `each format is recognised by its root element`() {
