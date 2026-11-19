@@ -33,6 +33,7 @@ import org.churchpresenter.bibletab.bibleTab
 import org.churchpresenter.bible.SpbFixture
 import org.churchpresenter.core.models.bible.SelectedVerse
 import org.churchpresenter.bibletab.bibleFixture
+import org.churchpresenter.bibletab.lostBooksFixture
 import org.churchpresenter.bibletab.splitAtWordMidpoint
 import org.churchpresenter.bibletab.BibleViewModel
 import org.churchpresenter.stt.STTManager
@@ -119,6 +120,13 @@ class BibleTabScreenshotTest {
         vm.selectChapter(3)
         waitForIdle()
     }
+
+    @Test
+    fun `a module with the Apocrypha and lost books, each section headed`() =
+        shoot("lost_books", content = lostBooksFixture) { vm ->
+            vm.selectBook(7)
+            waitForIdle()
+        }
 
     @Test
     fun `a verse selected`() = shoot("verse_selected") { vm ->

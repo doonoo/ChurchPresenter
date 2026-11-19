@@ -84,6 +84,39 @@ val bibleFixture = SpbFixture.buildContent(
     ),
 )
 
+/**
+ * A module carrying books from every section past the 66 — the Apocrypha, the lost books, the New
+ * Testament apocrypha — in canon order, with 1 Enoch's first chapter to open on. Its Enoch is named
+ * in Russian, so a test can tell the module's own name from the English one the search box also reads.
+ */
+val lostBooksFixture = SpbFixture.buildContent(
+    title = "Lost Books",
+    books = listOf(
+        SpbFixture.Book(1, "Genesis", 50),
+        SpbFixture.Book(39, "Malachi", 4),
+        SpbFixture.Book(40, "Matthew", 28),
+        SpbFixture.Book(66, "Revelation", 22),
+        SpbFixture.Book(67, "Judith", 16),
+        SpbFixture.Book(69, "Tobit", 14),
+        SpbFixture.Book(72, "1 Maccabees", 16),
+        SpbFixture.Book(100, "Книга Еноха", 108),
+        SpbFixture.Book(103, "Jubilees", 50),
+        SpbFixture.Book(104, "Jasher", 91),
+        SpbFixture.Book(130, "Testament of Reuben", 7),
+        SpbFixture.Book(200, "Gospel of Thomas", 114),
+        SpbFixture.Book(240, "Didache", 16),
+    ),
+    verses = listOf(
+        SpbFixture.Verse(1, 1, 1, "In the beginning God created the heaven and the earth."),
+        SpbFixture.Verse(66, 1, 1, "The Revelation of Jesus Christ."),
+        SpbFixture.Verse(
+            100, 1, 1, "The words of the blessing of Enoch, wherewith he blessed the elect and righteous.",
+        ),
+        SpbFixture.Verse(100, 1, 2, "And he took up his parable and said: Enoch a righteous man."),
+        SpbFixture.Verse(100, 1, 3, "Concerning the elect I said, and took up my parable concerning them."),
+    ),
+)
+
 /** File name of the optional second module — see `bibleTab`'s `secondContent`. */
 const val SECOND_MODULE = "second.spb"
 
