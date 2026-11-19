@@ -1,11 +1,11 @@
-package org.churchpresenter.dictionary.data
+package org.churchpresenter.bibleformats
 
 /**
- * Turns the marked-up definitions dictionary modules carry into the plain text the tab and the
- * output show: MySword and MyBible write HTML, e-Sword writes RTF, Zefania writes XML that the reader
- * has already reduced to text.
+ * Turns the markup Bible software writes its modules in into the plain text the app shows: MySword
+ * and MyBible write HTML (and, in Bible verses, their own tags -- see [fromVerse]), e-Sword writes
+ * RTF. Shared by the Bible importer here and the dictionary importer in `:dictionary`.
  */
-internal object DictionaryText {
+object ModuleMarkup {
 
     private val BREAK_TAG = Regex("(?i)<\\s*(br|/p|/div|/li|/h[1-6]|/tr)\\b[^>]*>")
     private val ANY_TAG = Regex("<[^>]*>")
@@ -25,6 +25,31 @@ internal object DictionaryText {
 
     private const val UTF16_RANGE = 65536
     private const val HEX_RADIX = 16
+
+    /**
+     * What a module stores inside a verse besides its words, dropped whole: MySword's notes
+     * (`<RF>…<Rf>`) and headings (`<TS>…<Ts>`), MyBible's Strong's numbers (`<S>…</S>`), morphology
+     * (`<m>…</m>`), footnotes (`<f>…</f>`, `<n>…</n>`) and headings (`<h>…</h>`).
+     */
+    private val VERSE_ASIDES = Regex(
+        "(?s)<RF[^>]*>.*?<Rf>|<TS>.*?<Ts>|<S>.*?</S>|<m>.*?</m>|<f>.*?</f>|<n>.*?</n>|<h>.*?</h>",
+    )
+
+    /** MySword's Strong's and morphology tags after a word (`<WG25>`, `<WTV-PAI>`), which carry no text. */
+    private val WORD_TAGS = Regex("<W[GHT][^>]*>")
+
+    /** An RTF control word -- how an e-Sword verse, which has no braces around it, is recognised. */
+    private val RTF_WORD = Regex("\\\\[a-z]+-?\\d*")
+
+    /**
+     * One verse's text as a module stores it, as the words alone: notes, Strong's numbers and
+     * headings dropped, MySword's `<CM>` paragraph mark and the rest of the markup removed.
+     */
+    fun fromVerse(raw: String): String {
+        if (RTF_WORD.containsMatchIn(raw)) return fromRtf(raw).replace('\n', ' ').trim()
+        val bare = raw.replace(VERSE_ASIDES, "").replace(WORD_TAGS, "").replace("<CM>", " ")
+        return clean(bare).replace('\n', ' ').replace(Regex(" +"), " ").trim()
+    }
 
     /** [raw] as plain text, whichever of HTML or RTF it is written in. */
     fun clean(raw: String): String = when {

@@ -19,6 +19,8 @@ dependencies {
     implementation(projects.settings)
     implementation(projects.theme)
     implementation(projects.bible)
+    // ModuleMarkup: the HTML and RTF that MySword, MyBible and e-Sword modules are written in.
+    implementation(projects.bibleFormats)
 
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.swing)

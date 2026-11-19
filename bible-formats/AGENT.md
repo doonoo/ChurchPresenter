@@ -12,7 +12,7 @@ Two halves that were always one job, split across a module boundary until now:
 
 | Package | Owns |
 |---|---|
-| `org.churchpresenter.bibleformats` | The format converters — `XmlToSpbConverter` (Zefania XML), `UsfxToSpbConverter` (eBible USFX), `OsisToSpbConverter` (OSIS), `PlainTextBookParser` (a book typed out as text), `BibleImport` (picks one of them by the file's contents), `BebliaParser`, `BookNames`, `SpbVersePatcher`/`VersePatches`, `BibleCatalogNaming` |
+| `org.churchpresenter.bibleformats` | The format converters — `XmlToSpbConverter` (Zefania XML), `UsfxToSpbConverter` (eBible USFX), `OsisToSpbConverter` (OSIS), `PlainTextBookParser` (a book typed out as text), `SqliteBibleReader` (MySword, e-Sword and MyBible modules), `ModuleMarkup` (their HTML, RTF and verse tags as text, shared with `:dictionary`), `BibleImport` (picks one of them by the file's contents), `BebliaParser`, `BookNames`, `SpbVersePatcher`/`VersePatches`, `BibleCatalogNaming` |
 | `…bibleformats.catalog` | The sources and the installer — `BibleSource` and its three implementations (`EBibleSource`, `ZefaniaSource`, `BebliaSource`), the two index caches, `BibleInstallSupport`, `BibleLanguageNames` |
 
 **Why they had to move together.** The catalogue sources import the converters, and the converters

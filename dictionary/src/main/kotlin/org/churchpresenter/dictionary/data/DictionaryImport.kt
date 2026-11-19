@@ -1,5 +1,6 @@
 package org.churchpresenter.dictionary.data
 
+import org.churchpresenter.bibleformats.ModuleMarkup
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
@@ -36,7 +37,7 @@ data class ImportedDictionary(val name: String, val language: String, val entrie
  * - **MySword, MyBible and e-Sword** SQLite modules (`.mybible`, `.dct`, `.dctx`, `.sqlite3`…) —
  *   see [SqliteDictionaryReader].
  *
- * Every definition is reduced to plain text ([DictionaryText]). An entry with neither a headword
+ * Every definition is reduced to plain text ([ModuleMarkup]). An entry with neither a headword
  * nor a definition is dropped.
  */
 object DictionaryImport {
@@ -138,8 +139,8 @@ object DictionaryImport {
      */
     internal fun entryFrom(lookup: (List<String>) -> String?): ImportedEntry? {
         val rawKey = lookup(KEY_FIELDS)?.trim().orEmpty()
-        val headword = lookup(HEADWORD_FIELDS)?.let(DictionaryText::clean).orEmpty()
-        val definition = lookup(DEFINITION_FIELDS)?.let(DictionaryText::clean).orEmpty()
+        val headword = lookup(HEADWORD_FIELDS)?.let(ModuleMarkup::clean).orEmpty()
+        val definition = lookup(DEFINITION_FIELDS)?.let(ModuleMarkup::clean).orEmpty()
         if (headword.isBlank() && definition.isBlank()) return null
         val headwordNumber = normalizeStrongs(headword)
         return ImportedEntry(
@@ -147,9 +148,9 @@ object DictionaryImport {
             // A lexicon that files each entry under its number has no headword of its own to show.
             headword = if (headwordNumber != null) "" else headword,
             definition = definition,
-            transliteration = lookup(TRANSLIT_FIELDS)?.let(DictionaryText::clean).orEmpty(),
-            pronunciation = lookup(PRONUNCIATION_FIELDS)?.let(DictionaryText::clean).orEmpty(),
-            usage = lookup(USAGE_FIELDS)?.let(DictionaryText::clean).orEmpty(),
+            transliteration = lookup(TRANSLIT_FIELDS)?.let(ModuleMarkup::clean).orEmpty(),
+            pronunciation = lookup(PRONUNCIATION_FIELDS)?.let(ModuleMarkup::clean).orEmpty(),
+            usage = lookup(USAGE_FIELDS)?.let(ModuleMarkup::clean).orEmpty(),
         )
     }
 

@@ -1,5 +1,6 @@
 package org.churchpresenter.dictionary.data
 
+import org.churchpresenter.bibleformats.ModuleMarkup
 import java.io.File
 import java.nio.file.Files
 import java.sql.DriverManager
@@ -103,8 +104,8 @@ class DictionaryImportEdgeCasesTest {
 
     @Test
     fun `bare RTF and bare entities are both cleaned, and an entity past Unicode is kept as written`() {
-        assertEquals("one\ntwo", DictionaryText.clean("""one\par two"""))
-        assertEquals("&#99999999; < >", DictionaryText.clean("&#99999999; &lt; &gt;"))
+        assertEquals("one\ntwo", ModuleMarkup.clean("""one\par two"""))
+        assertEquals("&#99999999; < >", ModuleMarkup.clean("&#99999999; &lt; &gt;"))
     }
 
     @Test

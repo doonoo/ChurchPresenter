@@ -5,7 +5,8 @@ import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.XMLStreamConstants
 
 /**
- * Reads any scripture file the app can import — Zefania, Beblia, OSIS, USFX or plain text — choosing
+ * Reads any scripture file the app can import — Zefania, Beblia, OSIS, USFX, plain text, or a MySword,
+ * e-Sword or MyBible module ([SqliteBibleReader]) — choosing
  * the reader from the file itself, so an operator importing a lost book need not know its format.
  *
  * XML is told apart by its root element, read without parsing the rest of the file. A file that is
@@ -16,16 +17,19 @@ import javax.xml.stream.XMLStreamConstants
 object BibleImport {
 
     /** What a file was recognised as. */
-    enum class Format { ZEFANIA, OSIS, USFX, PLAIN_TEXT }
+    enum class Format { ZEFANIA, OSIS, USFX, PLAIN_TEXT, SQLITE }
 
     /** The extensions the import picker offers. */
-    val EXTENSIONS: List<String> = listOf("xml", "osis", "usfx", "txt")
+    val EXTENSIONS: List<String> = listOf("xml", "osis", "usfx", "txt", "mybible", "bblx", "sqlite3")
+
+    private const val SQLITE_MAGIC = "SQLite format 3"
 
     /** The extensions that always mean XML, whether or not the file inside parses. */
     private val XML_EXTENSIONS = setOf("xml", "osis", "usfx")
 
     /** Which reader [file] needs: by its XML root, or [Format.PLAIN_TEXT] for a text file. */
     fun detect(file: File): Format {
+        if (isSqlite(file)) return Format.SQLITE
         val root = rootElementOf(file)?.lowercase()
         return when {
             root == null && file.extension.lowercase() !in XML_EXTENSIONS -> Format.PLAIN_TEXT
@@ -47,6 +51,7 @@ object BibleImport {
             name = file.nameWithoutExtension,
             language = null,
         )
+        Format.SQLITE -> SqliteBibleReader.parse(file)
         Format.PLAIN_TEXT -> PlainTextBookParser.parse(file, bookName = file.nameWithoutExtension).also {
             require(it.hasVerses) { "No numbered verses found in ${file.name}" }
         }
@@ -54,6 +59,10 @@ object BibleImport {
 
     /** [file] read and written to [outputFile] as an `.spb` module. */
     fun convert(file: File, outputFile: File) = XmlToSpbConverter.write(parse(file), outputFile)
+
+    /** Whether [file] begins with the SQLite header, as every MySword, e-Sword and MyBible module does. */
+    private fun isSqlite(file: File): Boolean =
+        file.inputStream().use { it.readNBytes(SQLITE_MAGIC.length) }.toString(Charsets.ISO_8859_1) == SQLITE_MAGIC
 
     /** The local name of [file]'s root element, or null when the file does not open as XML. */
     internal fun rootElementOf(file: File): String? {

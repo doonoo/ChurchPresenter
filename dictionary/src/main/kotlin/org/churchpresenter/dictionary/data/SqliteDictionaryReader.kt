@@ -1,5 +1,6 @@
 package org.churchpresenter.dictionary.data
 
+import org.churchpresenter.bibleformats.ModuleMarkup
 import org.sqlite.SQLiteConfig
 import java.io.File
 import java.sql.Connection
@@ -37,7 +38,7 @@ internal object SqliteDictionaryReader {
             val (table, headword, definition) = entriesTable(db)
                 ?: throw IllegalArgumentException("${file.name} has no table of dictionary entries")
             val entries = readEntries(db, table, headword, definition)
-            val name = firstValue(db, TITLE_QUERIES)?.let(DictionaryText::clean) ?: fallbackName
+            val name = firstValue(db, TITLE_QUERIES)?.let(ModuleMarkup::clean) ?: fallbackName
             return ImportedDictionary(name, firstValue(db, LANGUAGE_QUERIES).orEmpty(), entries)
         }
     }
