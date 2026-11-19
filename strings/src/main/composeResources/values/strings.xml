@@ -2596,7 +2596,7 @@
     <string name="dictionary_remove_title">Remove %1$s?</string>
     <string name="dictionary_remove_text">Its copy in ChurchPresenter is deleted. The file you imported it from is not touched.</string>
     <string name="dictionary_in_your_lexicons">In your lexicons</string>
-    <string name="dictionary_lexicon_badge">LEXICON</string>
+    <string name="profile_dict_lexicons">Imported lexicons beside Strong's</string>
     <string name="em_dash">—</string>
     <!-- Contact / feedback form (Help → Contact) -->
     <string name="menu_contact_us">Contact</string>

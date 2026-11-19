@@ -12,6 +12,7 @@ private val STRONGS_NUMBER = Regex("^[HG][1-9]\\d*[a-z]?$")
  *   entry `<dictionary id>:<headword>`, which nothing shows.
  * @property source the imported dictionary's name, blank for the built-in Strong's. Shown on the
  *   output in place of a key that means nothing to the congregation.
+ * @property companions the imported lexicons' entries for the same number.
  */
 @Serializable
 data class StrongsEntry(
@@ -22,6 +23,11 @@ data class StrongsEntry(
     val definition: String,
     val kjvUsage: String = "",
     val source: String = "",
+    /**
+     * What the operator's imported lexicons say of this entry, carried with it when it goes live so
+     * the output can lay them beside it. Empty for an entry from any other source.
+     */
+    val companions: List<StrongsEntry> = emptyList(),
 ) {
     val isHebrew: Boolean get() = number.startsWith("H")
     val isGreek: Boolean get() = number.startsWith("G")

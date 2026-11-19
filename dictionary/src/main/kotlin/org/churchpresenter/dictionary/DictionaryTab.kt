@@ -69,11 +69,15 @@ fun DictionaryTab(
     val searchFirst = appSettings?.keyboardShortcutSettings?.focusSearchOnTabOpen == true
     LaunchedEffect(searchFocus) { if (searchFirst) searchFocus.focusAndSelectAll() }
     val entry = viewModel.selectedEntry
+    // What goes live carries the imported lexicons' entries, for the output to lay beside it.
+    val goLive = onGoLive?.let { send ->
+        { e: StrongsEntry -> send(e.copy(companions = viewModel.lexiconEntriesFor(e))) }
+    }
     Row(
         modifier = modifier.goLiveKeyTarget(
             enabled = entry != null && onGoLive != null && entry.number != liveEntryNumber,
             focusOnOpen = !searchFirst,
-        ) { entry?.let { onGoLive?.invoke(it) } }
+        ) { entry?.let { goLive?.invoke(it) } }
     ) {
         DictionaryListPane(
             modifier = Modifier.width(with(density) { listWidthPx.toDp() }).fillMaxHeight()
@@ -129,7 +133,7 @@ fun DictionaryTab(
             onAddToSchedule = onAddToSchedule?.let { cb ->
                 { e -> cb(e.number, e.word, e.transliteration, e.definition) }
             },
-            onGoLive = onGoLive,
+            onGoLive = goLive,
             showsLanguageToggle = viewModel.activeSourceId == null,
             lexiconEntries = viewModel.selectedEntry?.let(viewModel::lexiconEntriesFor).orEmpty(),
         )

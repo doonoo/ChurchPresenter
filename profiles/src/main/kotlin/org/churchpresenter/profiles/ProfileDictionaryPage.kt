@@ -16,6 +16,7 @@ import org.churchpresenter.strings.generated.resources.profile_card_color
 import org.churchpresenter.strings.generated.resources.profile_card_opacity
 import org.churchpresenter.strings.generated.resources.dictionary_definition
 import org.churchpresenter.strings.generated.resources.profile_dict_kjv
+import org.churchpresenter.strings.generated.resources.profile_dict_lexicons
 import org.churchpresenter.strings.generated.resources.profile_reference
 import org.churchpresenter.strings.generated.resources.profile_dict_word
 import org.churchpresenter.strings.generated.resources.profile_group_card
@@ -65,6 +66,12 @@ internal fun ProfileDictionaryPage(draft: AppSettings, onSettingsChange: ((AppSe
                 paths = listOf("$DICT.${p.showField}"),
             )
         }
+        SettingsSwitchRow(
+            Res.string.profile_dict_lexicons,
+            ds.showLexicons,
+            { v -> update { it.copy(showLexicons = v) } },
+            paths = listOf("$DICT.showLexicons"),
+        )
     }
     SettingsGroup(
         stringResource(Res.string.profile_group_text),
