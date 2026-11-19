@@ -7,6 +7,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
 import java.io.File
+import javax.swing.filechooser.FileNameExtensionFilter
 import javax.xml.parsers.DocumentBuilderFactory
 import org.w3c.dom.Element
 
@@ -40,9 +41,14 @@ data class ImportedDictionary(val name: String, val language: String, val entrie
  */
 object DictionaryImport {
 
-    /** The extensions the import picker offers. */
-    val EXTENSIONS: List<String> =
-        listOf("json", "csv", "tsv", "txt", "xml", "mybible", "dct", "dctx", "lexx", "sqlite", "sqlite3", "db")
+    /** The import picker's filter, called [description]: every extension a dictionary file comes in. */
+    fun fileFilter(description: String): FileNameExtensionFilter = FileNameExtensionFilter(
+        description,
+        "json", "csv", "tsv", "txt", "xml", "mybible", "dct", "dctx", "lexx", "sqlite", "sqlite3", "db",
+    )
+
+    /** The extensions [fileFilter] offers. */
+    val EXTENSIONS: List<String> = fileFilter("").extensions.toList()
 
     private val HEADWORD_FIELDS = listOf("word", "headword", "term", "topic", "title", "lemma", "name")
     private val KEY_FIELDS = listOf("number", "strongs", "strong", "key", "id")

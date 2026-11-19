@@ -10,6 +10,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -22,6 +23,8 @@ import org.churchpresenter.sharedui.composables.DragHandle
 import org.churchpresenter.sharedui.composables.SearchFieldFocus
 import org.churchpresenter.sharedui.composables.goLiveKeyTarget
 import org.churchpresenter.sharedui.composables.bibleListCard
+import kotlinx.coroutines.launch
+import java.io.File
 
 /** The divider between the entry list and the detail pane, dragged to resize the list. */
 internal const val DICTIONARY_LIST_DIVIDER_TAG = "dictionary-list-divider"
@@ -40,8 +43,12 @@ fun DictionaryTab(
     getBookName: ((bookId: Int) -> String?)? = null,
     onWordClick: ((strongsNumber: String) -> Unit)? = null,
     onVerseClick: ((bookId: Int, chapter: Int, verse: Int) -> Unit)? = null,
+    /** Asks the operator for a dictionary file to import; null when they cancel. */
+    chooseDictionaryFile: suspend () -> File? = rememberDictionaryFileChooser(),
 ) {
-    LaunchedEffect(Unit) { viewModel.load() }
+    val scope = rememberCoroutineScope()
+    // Keyed on the source, so choosing another dictionary reads it.
+    LaunchedEffect(viewModel.activeSourceId) { viewModel.load() }
     val entryIndex = remember(viewModel.entries) { viewModel.entries.associateBy { it.number } }
     val density = LocalDensity.current
     val onSettingsChangeState = rememberUpdatedState(onSettingsChange)
@@ -75,6 +82,7 @@ fun DictionaryTab(
             viewModel = viewModel,
             getBookName = getBookName,
             searchFocus = searchFocus,
+            onImport = { scope.launch { chooseDictionaryFile()?.let(viewModel::importDictionary) } },
         )
         DragHandle(
             modifier = Modifier.testTag(DICTIONARY_LIST_DIVIDER_TAG),
@@ -122,6 +130,8 @@ fun DictionaryTab(
                 { e -> cb(e.number, e.word, e.transliteration, e.definition) }
             },
             onGoLive = onGoLive,
+            showsLanguageToggle = viewModel.activeSourceId == null,
+            lexiconEntries = viewModel.selectedEntry?.let(viewModel::lexiconEntriesFor).orEmpty(),
         )
     }
 }
