@@ -294,4 +294,46 @@ class BookNamesDialogTest {
         waitForIdle()
         assertEquals(1, clicks)
     }
+
+    private val withExtras = ModuleBookNames(
+        (1..BOOK_COUNT).associateWith { "File $it" } + (69 to "Tobias"),
+        BookNamesRead.ALL,
+        extraBookIds = listOf(69, 100, 905),
+    )
+
+    @Test
+    fun `an ordinary Bible offers no extra books filter`() = runComposeUiTest {
+        show()
+        assertTrue(onAllNodesWithText("Apocrypha & lost books", substring = true).fetchSemanticsNodes().isEmpty())
+        assertTrue(onAllNodesWithText("All  $BOOK_COUNT").fetchSemanticsNodes().isNotEmpty())
+    }
+
+    @Test
+    fun `the extra books are counted, filtered to and grouped by section`() = runComposeUiTest {
+        show(withExtras)
+        assertTrue(onAllNodesWithText("All  ${BOOK_COUNT + 3}").fetchSemanticsNodes().isNotEmpty())
+
+        onNodeWithText("Apocrypha & lost books  3").performClick()
+        waitForIdle()
+
+        listOf("Apocrypha", "Lost Books", "Other Books").forEach {
+            assertTrue(onAllNodesWithText(it, ignoreCase = true).fetchSemanticsNodes().isNotEmpty(), "the $it heading")
+        }
+        assertTrue(onAllNodesWithText("Tobit").fetchSemanticsNodes().isNotEmpty(), "the canon's English name")
+        assertTrue(onAllNodesWithText("1 Enoch").fetchSemanticsNodes().isNotEmpty())
+        assertTrue(onAllNodesWithText("Genesis").fetchSemanticsNodes().isEmpty())
+    }
+
+    @Test
+    fun `an extra book can be renamed and is saved`() = runComposeUiTest {
+        val outcome = show(withExtras)
+        onNodeWithText("Apocrypha & lost books  3").performClick()
+        waitForIdle()
+
+        type("1 Enoch", "Книга Еноха")
+        onNodeWithText("Save").performClick()
+        waitForIdle()
+
+        assertEquals(mapOf(100 to "Книга Еноха"), outcome.saved)
+    }
 }

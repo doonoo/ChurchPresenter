@@ -53,6 +53,21 @@ class BookNamesScreenshotTest {
     @Test
     fun `names from the file`() = shoot("from_file", allNames)
 
+    /** A module carrying the Apocrypha and lost books: Tobit named by its file, Enoch by a placeholder, one book no table lists. */
+    private val withExtras = allNames.copy(
+        names = allNames.names + (69 to "Товит"),
+        extraBookIds = listOf(67, 69, 100, 103, 104, 200, 905),
+    )
+
+    @Test
+    fun `a module with the Apocrypha and lost books`() = shoot("extra_books", withExtras, mapOf(104 to "Книга Праведного"))
+
+    @Test
+    fun `only the extra books listed`() = shoot("filter_extra", withExtras, mapOf(104 to "Книга Праведного")) {
+        onNodeWithText("Apocrypha & lost books  7").performClick()
+        waitForIdle()
+    }
+
     @Test
     fun `some books overridden`() = shoot("overridden", allNames, mapOf(2 to "Шемот", 3 to "Ваикра"))
 

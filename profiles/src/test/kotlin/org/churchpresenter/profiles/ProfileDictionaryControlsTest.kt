@@ -8,6 +8,7 @@ import org.churchpresenter.settings.DictionarySettings
 import org.churchpresenter.settings.OutputProfile
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 import org.churchpresenter.sharedui.testing.retypeNumberField
@@ -54,6 +55,16 @@ class ProfileDictionaryControlsTest {
         assertNotEquals(d.wordOutline, ds.wordOutline)
         assertNotEquals(d.wordBackdrop, ds.wordBackdrop)
         assertNotEquals(d.referenceBackdrop, ds.referenceBackdrop)
+    }
+
+    @Test
+    fun `imported lexicons beside Strong's can be turned off`() = profilesTab(doc()) { get ->
+        openCustomizePane(CustomizePane.DICTIONARY)
+        assertTrue(get().profile().dictionarySettings.showLexicons, "on by default")
+
+        toggleCheckbox("Imported lexicons beside Strong's")
+
+        assertFalse(get().profile().dictionarySettings.showLexicons)
     }
 
     @Test

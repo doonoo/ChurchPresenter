@@ -171,6 +171,39 @@ class DictionaryTabUserDictionaryTest {
     }
 
     @Test
+    fun `a Strong's entry goes live carrying what each lexicon says of it`() {
+        val dir = root()
+        val library = UserDictionaryLibrary(File(dir, "dictionaries")).apply { import(thayer(dir), name = "Thayer's") }
+        dictionaryTab(library = library) { vm, reports ->
+            val g26 = vm.entries.first { it.number == "G26" }
+            waitUntil("the lexicons to be indexed", TIMEOUT_MS) { vm.lexiconEntriesFor(g26).isNotEmpty() }
+            vm.onEntrySelected(g26)
+            waitForIdle()
+
+            dictButton(DictionaryLabel.GO_LIVE).performClick()
+            waitForIdle()
+
+            val live = reports.live.single()
+            assertEquals("G26", live.number)
+            assertEquals(listOf("Thayer's"), live.companions.map { it.source })
+        }
+    }
+
+    @Test
+    fun `an entry with no lexicons goes live with none`() {
+        val library = UserDictionaryLibrary(File(root(), "dictionaries"))
+        dictionaryTab(library = library) { vm, reports ->
+            vm.onEntrySelected(vm.entries.first { it.number == "H430" })
+            waitForIdle()
+
+            dictButton(DictionaryLabel.GO_LIVE).performClick()
+            waitForIdle()
+
+            assertTrue(reports.live.single().companions.isEmpty())
+        }
+    }
+
+    @Test
     fun `an imported dictionary's entry shows its dictionary and never its key`() {
         val dir = root()
         val library = UserDictionaryLibrary(File(dir, "dictionaries")).apply { import(eastons(dir)) }

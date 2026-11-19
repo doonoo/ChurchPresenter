@@ -170,4 +170,49 @@ class BookNamesTest {
         assertEquals("", empty.englishOf(1))
         assertEquals("", empty.localizedOf(1))
     }
+
+    @Test
+    fun `a module's extra books are read, placeholder-named ones too`() {
+        val content = SpbFixture.buildContent(
+            title = "T",
+            books = listOf(
+                SpbFixture.Book(1, "Genesis", 1), SpbFixture.Book(100, "Book 100", 1), SpbFixture.Book(69, "Tobias", 1),
+            ),
+            verses = emptyList(),
+        )
+        SpbFixture.spbFile(dir, name = "x.spb", content = content)
+        val module = read("x.spb")
+
+        assertEquals(listOf(69, 100), module.extraBookIds)
+        assertEquals("Tobias", module.names[69])
+        assertTrue(100 !in module.names, "a placeholder is no name")
+    }
+
+    @Test
+    fun `the extra books follow the sixty-six, with a renamed one no longer in the file`() {
+        assertEquals((1..BOOK_COUNT).toList() + listOf(69, 100, 104), allBookIds(listOf(100, 69), mapOf(104 to "Jasher")))
+        assertEquals((1..BOOK_COUNT).toList(), allBookIds(emptyList(), mapOf(5 to "Devarim")))
+    }
+
+    @Test
+    fun `the extra filter lists only the books past the sixty-six`() {
+        val extra = bookIdsShown(BookNameFilter.EXTRA, "", emptyMap(), emptyMap(), titles, listOf(69, 100))
+        val all = bookIdsShown(BookNameFilter.ALL, "", emptyMap(), emptyMap(), titles, listOf(69, 100))
+
+        assertEquals(listOf(69, 100), extra)
+        assertEquals(BOOK_COUNT + 2, all.size)
+        assertTrue(bookIdsShown(BookNameFilter.NEW_TESTAMENT, "", emptyMap(), emptyMap(), titles, listOf(69)).none { it > BOOK_COUNT })
+    }
+
+    @Test
+    fun `an extra book is found by its canon name`() {
+        assertEquals(listOf(100), bookIdsShown(BookNameFilter.ALL, "enoch", emptyMap(), emptyMap(), titles, listOf(100)))
+    }
+
+    @Test
+    fun `past the sixty-six a book's titles are its English canon name, or nothing`() {
+        assertEquals("Tobit", titles.englishOf(69))
+        assertEquals("Tobit", titles.localizedOf(69), "the app has no translated names past the 66")
+        assertEquals("", titles.englishOf(905))
+    }
 }
