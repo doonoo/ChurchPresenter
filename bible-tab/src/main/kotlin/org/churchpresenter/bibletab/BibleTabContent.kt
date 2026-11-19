@@ -312,7 +312,8 @@ private fun ColumnScope.BibleBrowser(viewModel: BibleViewModel, tab: BibleTabSco
 
         // Provided rather than passed: the verse row that draws it is five levels down.
         CompositionLocalProvider(
-            LocalVerseSplitMark provides viewModel.liveVerseSplitMark(displayedVerses.firstOrNull())
+            LocalVerseSplitMark provides viewModel.liveVerseSplitMark(displayedVerses.firstOrNull()),
+            LocalBookSections provides viewModel.bookSections.value,
         ) {
             BibleBrowserPane(
                 books = books,

@@ -70,6 +70,49 @@ class DictionaryPresenterRenderTest {
     }
 
     @Test
+    fun `an imported entry names its dictionary and never shows its key`() = runDict(
+        StrongsEntry(
+            number = "dict-eastons:Abba", word = "Abba", transliteration = "", pronunciation = "",
+            definition = "Father.", source = "Easton's Bible Dictionary",
+        ),
+    ) {
+        onNodeWithText("Easton's Bible Dictionary", substring = true)
+            .assertExists("the reference line names the dictionary")
+        onNodeWithText("dict-eastons", substring = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun `a lexicon entry shows its number and its lexicon`() = runDict(elohim.copy(source = "BDB")) {
+        onNodeWithText("H430 · BDB", substring = true).assertExists()
+    }
+
+    private val withLexicons = elohim.copy(
+        companions = listOf(
+            elohim.copy(definition = "gods, the true God, God's representatives", source = "BDB"),
+            elohim.copy(definition = "  ", source = "Empty Lexicon"),
+        ),
+    )
+
+    @Test
+    fun `imported lexicons are laid beside Strong's, each under its name`() = runDict(withLexicons) {
+        onNodeWithText("Strong's Concordance").assertExists("Strong's own column is labelled once there are others")
+        onNodeWithText("BDB").assertExists()
+        onNodeWithText("the supreme God", substring = true).assertExists()
+        onNodeWithText("the true God", substring = true).assertExists()
+        onNodeWithText("Empty Lexicon").assertDoesNotExist()
+    }
+
+    @Test
+    fun `with lexicons turned off only Strong's definition is shown`() = runDict(
+        withLexicons,
+        DictionarySettings(showLexicons = false),
+    ) {
+        onNodeWithText("the supreme God", substring = true).assertExists()
+        onNodeWithText("the true God", substring = true).assertDoesNotExist()
+        onNodeWithText("Strong's Concordance").assertDoesNotExist()
+    }
+
+    @Test
     fun `no entry leaves the screen blank`() = runDict(entry = null) {
         onNodeWithText("ʼĕlôhîym", substring = true)
             .assertDoesNotExist()

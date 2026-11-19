@@ -36,7 +36,7 @@ class BibleConverterTabTest {
             setConverterContent(pickers) { BibleConverterTab(onConverted = { converted += it }) }
 
             click(Strings.selectXmlFiles)
-            assertEquals(listOf("xml"), pickers.requestedExtensions)
+            assertEquals(listOf("xml,osis,usfx,txt,mybible,bblx,sqlite3"), pickers.requestedExtensions)
             assertTrue(isShowing(Strings.fileCount(1)))
 
             click(Strings.preview)
@@ -101,7 +101,7 @@ class BibleConverterTabTest {
             pickers.files = listOf(spb, missing)
 
             click(Strings.selectSpbFiles)
-            assertEquals(listOf("xml", "spb"), pickers.requestedExtensions)
+            assertEquals(listOf("xml,osis,usfx,txt,mybible,bblx,sqlite3", "spb"), pickers.requestedExtensions)
             assertTrue(isShowing(Strings.fileCount(2)))
 
             click(Strings.fixVerses)

@@ -58,6 +58,8 @@ data class DictionarySettings(
     val showReference: Boolean = true,
     val showDefinition: Boolean = true,
     val showKjvUsage: Boolean = true,
+    /** Whether a Strong's entry's imported lexicon entries are laid out beside its definition. */
+    val showLexicons: Boolean = true,
     /**
      * Each item's own text box, keyed by [textBoxKey] with the name of the dictionary part it places.
      * An item with none, or with one turned off, is drawn where it always was.

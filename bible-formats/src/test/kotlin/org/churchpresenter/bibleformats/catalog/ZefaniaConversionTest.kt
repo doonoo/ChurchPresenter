@@ -48,6 +48,7 @@ class ZefaniaConversionTest {
         rights: String = "",
         title: String = "A Conservative Version",
         identifier: String = "ACV",
+        bookNumber: Int = 1,
     ): File {
         val xml = buildString {
             append("""<?xml version="1.0" encoding="utf-8"?>""")
@@ -58,7 +59,7 @@ class ZefaniaConversionTest {
             append("<source>https://example.invalid/x</source>")
             append("</INFORMATION>")
             val bname = bookName?.let { """ bname="$it"""" } ?: ""
-            append("""<BIBLEBOOK bnumber="1"$bname>""")
+            append("""<BIBLEBOOK bnumber="$bookNumber"$bname>""")
             append("""<CHAPTER cnumber="1"><VERS vnumber="1">In the beginning</VERS></CHAPTER>""")
             append("</BIBLEBOOK>")
             append("</XMLBIBLE>")
@@ -72,9 +73,9 @@ class ZefaniaConversionTest {
         return out.readText()
     }
 
-    /** The book-header line for book 1: `1<tab>Name<tab>chapters`. */
-    private fun bookNameIn(spb: String): String =
-        spb.lineSequence().first { it.startsWith("1\t") }.split("\t")[1]
+    /** The book-header line for [book]: `1<tab>Name<tab>chapters`. */
+    private fun bookNameIn(spb: String, book: Int = 1): String =
+        spb.lineSequence().first { it.startsWith("$book\t") }.split("\t")[1]
 
     @Test
     fun `an English module uses its own book names`() {
@@ -105,6 +106,20 @@ class ZefaniaConversionTest {
         val spb = convert(module(language = "RUS", bookName = "1 Mose"))
 
         assertEquals("Бытие", bookNameIn(spb), "Russian has a curated table, which wins over the module")
+    }
+
+    @Test
+    fun `a curated language keeps the module's own name for a book past the sixty-six`() {
+        val spb = convert(module(language = "GER", bookName = "Tobias", bookNumber = 69))
+
+        assertEquals("Tobias", bookNameIn(spb, 69), "the German table has no Tobit; the module's name is German")
+    }
+
+    @Test
+    fun `a book past the sixty-six with no name of its own falls back to its English name`() {
+        val spb = convert(module(language = "GER", bookNumber = 100))
+
+        assertEquals("1 Enoch", bookNameIn(spb, 100))
     }
 
     @Test

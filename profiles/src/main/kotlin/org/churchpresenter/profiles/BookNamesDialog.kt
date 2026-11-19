@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -56,6 +57,7 @@ import org.churchpresenter.strings.generated.resources.book_names_some_title
 import org.churchpresenter.strings.generated.resources.book_names_file_text
 import org.churchpresenter.strings.generated.resources.book_names_file_title
 import org.churchpresenter.strings.generated.resources.book_names_filter_all
+import org.churchpresenter.strings.generated.resources.book_names_filter_extra
 import org.churchpresenter.strings.generated.resources.book_names_find
 import org.churchpresenter.strings.generated.resources.book_names_new_testament
 import org.churchpresenter.strings.generated.resources.book_names_no_file_text
@@ -140,10 +142,11 @@ internal fun BookNamesContent(
     ) {
         DialogHeader(title, onDismiss)
         SourceBanner(module)
-        FilterBar(filter, draft.size, query, onFilter = { filter = it }, onQuery = { query = it })
+        val extraCount = allBookIds(module.extraBookIds, draft).size - BOOK_COUNT
+        FilterBar(filter, draft.size, extraCount, query, onFilter = { filter = it }, onQuery = { query = it })
         ColumnHeaders()
         BookList(
-            ids = bookIdsShown(filter, query, draft, fileNames, titles),
+            ids = bookIdsShown(filter, query, draft, fileNames, titles, module.extraBookIds),
             fileNames = fileNames,
             titles = titles,
             draft = draft,
@@ -237,6 +240,8 @@ private fun SourceBanner(module: ModuleBookNames) {
 private fun FilterBar(
     filter: BookNameFilter,
     overrideCount: Int,
+    /** How many books past the 66 there are to list; the filter for them is offered only when there are any. */
+    extraCount: Int,
     query: String,
     onFilter: (BookNameFilter) -> Unit,
     onQuery: (String) -> Unit,
@@ -245,8 +250,10 @@ private fun FilterBar(
         modifier = Modifier.padding(start = 18.dp, end = 18.dp, bottom = 10.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            FilterKey(stringResource(Res.string.book_names_filter_all), BOOK_COUNT, filter == BookNameFilter.ALL) {
+        // Wraps rather than clips: with the extra books' filter there are five keys to fit.
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            val allCount = BOOK_COUNT + extraCount
+            FilterKey(stringResource(Res.string.book_names_filter_all), allCount, filter == BookNameFilter.ALL) {
                 onFilter(BookNameFilter.ALL)
             }
             FilterKey(
@@ -259,6 +266,13 @@ private fun FilterBar(
                 BOOK_COUNT - OLD_TESTAMENT_BOOKS,
                 filter == BookNameFilter.NEW_TESTAMENT,
             ) { onFilter(BookNameFilter.NEW_TESTAMENT) }
+            if (extraCount > 0) {
+                FilterKey(
+                    stringResource(Res.string.book_names_filter_extra),
+                    extraCount,
+                    filter == BookNameFilter.EXTRA,
+                ) { onFilter(BookNameFilter.EXTRA) }
+            }
             FilterKey(
                 stringResource(Res.string.book_names_overridden),
                 overrideCount,

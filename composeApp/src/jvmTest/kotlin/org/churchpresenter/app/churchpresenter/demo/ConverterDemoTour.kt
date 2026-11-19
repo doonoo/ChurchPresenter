@@ -139,7 +139,7 @@ class ConverterDemoTour {
         caption("Only Bibles you're licensed to use", "The copyright notice stays with it")
         say("bible-convert")
         pickers.files = listOf(bible)
-        quietPanelClick(hasText("Select .xml Files"))
+        quietPanelClick(hasText("Select Files"))
         quietPanelClick(hasText("Preview"))
         point("Preview, then convert", "One Bible, ready to add", hasText("Convert 1", substring = true))
         quietPanelClick(hasText("Convert 1", substring = true))

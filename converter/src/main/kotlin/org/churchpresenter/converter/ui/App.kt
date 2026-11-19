@@ -37,7 +37,7 @@ import org.churchpresenter.converter.song.outputNamesFor
 import org.churchpresenter.converter.song.SongFormatConverter
 import org.churchpresenter.converter.song.SongPreviewInfo
 import org.churchpresenter.converter.song.SpsToSongConverter
-import org.churchpresenter.bibleformats.XmlToSpbConverter
+import org.churchpresenter.bibleformats.BibleImport
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -205,7 +205,7 @@ internal fun buildBiblePreview(files: List<File>, outputDir: File?): List<Previe
         val outDir = outputDir ?: file.parentFile
         val outFile = File(outDir, file.nameWithoutExtension + ".spb")
         val details = try {
-            val bible = XmlToSpbConverter.parse(file)
+            val bible = BibleImport.parse(file)
             val parts = mutableListOf<String>()
             parts.add("\"${bible.name}\"")
             parts.add("${bible.books.size} book(s)")

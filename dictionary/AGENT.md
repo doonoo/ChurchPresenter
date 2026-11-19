@@ -19,8 +19,14 @@ through its own `StrongsDictionaryRepository`, and its stage monitor shows a `St
 entry is a model in `:core-models` (`core.models.dictionary`), since the output, the server and this
 module all carry it.
 
-It takes `:shared-ui`, `:core-models`, `:strings`, `:icons`, `:settings`, `:theme` and `:bible`, and nothing of
-`:composeApp`'s.
+It takes `:shared-ui`, `:core-models`, `:strings`, `:icons`, `:settings`, `:theme`, `:bible` and
+`:bible-formats` (`ModuleMarkup`, for imported modules' HTML and RTF), and nothing of `:composeApp`'s.
+
+**Imported dictionaries** are `data/`'s `DictionaryImport` (JSON, CSV/TSV, Zefania XML, and the
+MySword, MyBible and e-Sword SQLite modules) and `UserDictionaryLibrary`, which keeps each import as
+JSON under the app data folder's `dictionaries/`. The view model's `DictionarySources` part chooses
+between Strong's and them; a test hands its own library in through the `DictionaryViewModel`
+constructor or the `dictionaryTab` harness, never the real app data folder.
 
 ## The data
 

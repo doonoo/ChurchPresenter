@@ -55,9 +55,16 @@ class UsfxToSpbConverterTest {
     }
 
     @Test
-    fun `a deuterocanonical or unknown code has no number`() {
-        // The app's canon is 66 books; anything else must be skipped, not guessed at.
-        assertNull(UsfxToSpbConverter.bookNumberFor("TOB"))
+    fun `deuterocanonical and lost-book codes map onto their canon numbers`() {
+        assertEquals(69, UsfxToSpbConverter.bookNumberFor("TOB"))
+        assertEquals(100, UsfxToSpbConverter.bookNumberFor("ENO"))
+        assertEquals(103, UsfxToSpbConverter.bookNumberFor("JUB"))
+    }
+
+    @Test
+    fun `an unknown code has no number`() {
+        // Front matter and glossaries must be skipped, not guessed at.
+        assertNull(UsfxToSpbConverter.bookNumberFor("FRT"))
         assertNull(UsfxToSpbConverter.bookNumberFor(""))
     }
 
@@ -128,14 +135,14 @@ class UsfxToSpbConverterTest {
     }
 
     @Test
-    fun `a book outside the 66-book canon is skipped`() {
+    fun `a deuterocanonical book is kept and sorted after the sixty-six`() {
         val bible = parse(
             usfx(
                 """<book id="TOB"><c id="1"/><v id="1"/>Apocryphal text<ve/></book>
                    <book id="GEN"><c id="1"/><v id="1"/>In the beginning<ve/></book>"""
             )
         )
-        assertEquals(listOf(1), bible.books.map { it.number }, "only the canonical book is kept")
+        assertEquals(listOf(1, 69), bible.books.map { it.number })
     }
 
     @Test

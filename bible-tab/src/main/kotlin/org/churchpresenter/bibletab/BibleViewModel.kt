@@ -17,6 +17,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import org.churchpresenter.settings.AppSettings
 import org.churchpresenter.bible.Bible
+import org.churchpresenter.bible.BibleCanon
+import org.churchpresenter.bible.CanonSection
 import org.churchpresenter.bible.BibleLoadError
 import org.churchpresenter.bible.BibleSearch
 import org.churchpresenter.core.models.bible.SelectedVerse
@@ -61,6 +63,11 @@ class BibleViewModel(
     internal val _books = mutableStateOf<List<String>>(emptyList())
 
     val books: State<List<String>> = _books
+
+    /** The section of each book in [books], by position: null for a number [BibleCanon] does not list. */
+    internal val _bookSections = mutableStateOf<List<CanonSection?>>(emptyList())
+
+    val bookSections: State<List<CanonSection?>> = _bookSections
 
     internal val _selectedBookIndex = mutableStateOf(0)
 
@@ -300,8 +307,6 @@ class BibleViewModel(
     }
 
     companion object {
-        internal const val CANONICAL_BOOK_COUNT = 66
-
         internal const val MODULE_FILE_MISSING = "Module file not found"
 
         internal const val MODULE_LOAD_THREW = "Module could not be loaded"
@@ -310,17 +315,14 @@ class BibleViewModel(
 
         internal const val MAX_DETECTED = 20
         internal const val DETECTION_DEDUPE_WINDOW = 32
-        internal val STANDARD_ENGLISH_BOOKS = listOf(
-            "genesis", "exodus", "leviticus", "numbers", "deuteronomy", "joshua", "judges", "ruth",
-            "1 samuel", "2 samuel", "1 kings", "2 kings", "1 chronicles", "2 chronicles",
-            "ezra", "nehemiah", "esther", "job", "psalms", "proverbs", "ecclesiastes", "song of solomon",
-            "isaiah", "jeremiah", "lamentations", "ezekiel", "daniel", "hosea", "joel", "amos",
-            "obadiah", "jonah", "micah", "nahum", "habakkuk", "zephaniah", "haggai", "zechariah", "malachi",
-            "matthew", "mark", "luke", "john", "acts", "romans",
-            "1 corinthians", "2 corinthians", "galatians", "ephesians", "philippians", "colossians",
-            "1 thessalonians", "2 thessalonians", "1 timothy", "2 timothy", "titus", "philemon",
-            "hebrews", "james", "1 peter", "2 peter", "1 john", "2 john", "3 john", "jude", "revelation"
-        )
+
+        /**
+         * Every book's standard English name in lower case, with its number: the 66, then the
+         * deuterocanon and the lost books. The search box reads a typed book against these as well
+         * as the module's own names.
+         */
+        internal val STANDARD_ENGLISH_BOOKS: List<Pair<Int, String>> =
+            BibleCanon.books.map { it.id to it.englishName.lowercase() }
     }
 
     internal val viewModelScope = CoroutineScope(dispatcher + SupervisorJob())

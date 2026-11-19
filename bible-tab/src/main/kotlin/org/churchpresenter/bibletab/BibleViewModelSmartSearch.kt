@@ -45,8 +45,8 @@ internal fun BibleViewModel.rankedBookMatches(token: String): List<Pair<Int, Int
         consider(i, scoreNameMatch(name.lowercase(), norm, normNoSpace))
     }
 
-    BibleViewModel.STANDARD_ENGLISH_BOOKS.forEachIndexed { i, english ->
-        consider(canonicalBookIdToIndex(i + 1), scoreNameMatch(english, norm, normNoSpace))
+    BibleViewModel.STANDARD_ENGLISH_BOOKS.forEach { (bookId, english) ->
+        consider(canonicalBookIdToIndex(bookId), scoreNameMatch(english, norm, normNoSpace))
     }
 
     return scored.entries
@@ -80,7 +80,7 @@ internal fun BibleViewModel.navigateToReference(
     matchType: String? = null,
 ) {
     val bible = _primaryBible.value ?: return
-    val bookCount = minOf(bible.getBookCount(), BibleViewModel.CANONICAL_BOOK_COUNT)
+    val bookCount = bible.getBookCount()
     if (bookCount == 0) return
     val idx = ref.bookIndex.coerceIn(0, bookCount - 1)
     val targetChapter = (ref.chapter ?: 1).coerceAtLeast(1)
@@ -180,7 +180,7 @@ internal fun BibleViewModel.selectSearchResult(result: BibleSearch) {
     val verse = result.verse.toIntOrNull() ?: 1
 
     val bible = _primaryBible.value ?: return
-    val bookCount = minOf(bible.getBookCount(), BibleViewModel.CANONICAL_BOOK_COUNT)
+    val bookCount = bible.getBookCount()
     if (bookCount == 0) return
 
     val clampedIndex = bookIndex.coerceIn(0, bookCount - 1)

@@ -75,6 +75,13 @@ class BibleCatalogModuleRowTest {
     }
 
     @Test
+    fun `a translation carrying the Apocrypha says so after its language`() {
+        val withApocrypha = module(39, 27).copy(dcBookCount = 18, sizeBytes = 0)
+
+        assertEquals("engkjv · eng · + Apocrypha (18 books) · 2024-05-01", subtitleOf(withApocrypha, showDate = true))
+    }
+
+    @Test
     fun `whatever the source did not publish is left out of the subtitle`() {
         val bare = module(39, 27, date = "").copy(identifier = "", language = "", sizeBytes = 0)
 

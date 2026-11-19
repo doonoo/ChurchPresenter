@@ -333,6 +333,8 @@ internal fun BibleBrowserColumn(
     singleLine: Boolean = false,
     centerText: Boolean = false,
     rowHeight: Dp = 32.dp,
+    /** A heading drawn above the row at each position — the book list's Apocrypha and Lost Books. */
+    sectionHeaders: Map<Int, String> = emptyMap(),
     onItemSelected: (Int) -> Unit
 ) {
     val listState = rememberLazyListState()
@@ -357,6 +359,8 @@ internal fun BibleBrowserColumn(
                 val isSelected = index == selectedIndex
                 val (hover, hovered) = rememberRowHover()
                 val colors = bibleRowColors(isSelected, hovered)
+                // Inside the row's own item, so a heading never shifts the index a row scrolls to.
+                sectionHeaders[index]?.let { BibleSectionHeading(it, first = index == 0) }
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()

@@ -53,8 +53,16 @@ data class BibleModule(
      */
     val otBookCount: Int = 0,
     val ntBookCount: Int = 0,
-    val fileStem: String
+    val fileStem: String,
+    /**
+     * How many deuterocanonical (Apocrypha) books the translation carries, where the source
+     * publishes it — eBible's `DCbooks` column. Zero when it carries none or the source doesn't say.
+     */
+    val dcBookCount: Int = 0,
 ) {
+    /** Whether the translation is known to carry the Apocrypha. */
+    val hasApocrypha: Boolean get() = dcBookCount > 0
+
     val fileName: String get() = "$fileStem.${Constants.EXTENSION_SPB}"
 
     /** Stable across sources, so an install in one tab can't be confused with one in another. */

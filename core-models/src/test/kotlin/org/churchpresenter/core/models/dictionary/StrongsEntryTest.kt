@@ -74,4 +74,21 @@ class StrongsEntryTest {
         assertFalse(entry("h430").isHebrew)
         assertEquals(26, entry("g26").numericValue, "the digits are still read, whatever the prefix")
     }
+
+    @Test
+    fun `only an H or G followed by a number is a Strong's number`() {
+        assertTrue(entry("H430").isStrongsNumber)
+        assertTrue(entry("G26").isStrongsNumber)
+        assertTrue(entry("H1254a").isStrongsNumber)
+        assertFalse(entry("Hagar").isStrongsNumber)
+        assertFalse(entry("easton:Aaron").isStrongsNumber)
+        assertFalse(entry("G0").isStrongsNumber)
+    }
+
+    @Test
+    fun `the reference shown is the number, the dictionary, or both for a lexicon`() {
+        assertEquals("G26", entry("G26").shownReference)
+        assertEquals("G26 · Thayer's", entry("G26").copy(source = "Thayer's").shownReference)
+        assertEquals("Easton's", entry("easton:Aaron").copy(source = "Easton's").shownReference)
+    }
 }

@@ -18,6 +18,8 @@ dependencies {
     implementation(projects.bible)
     // CrashReporter.reportWarning on a failed fetch or a malformed catalogue entry.
     implementation(projects.diagnostics)
+    // MySword, e-Sword and MyBible Bible modules are SQLite files.
+    implementation(libs.sqlite.jdbc)
 
     testImplementation(kotlin("test"))
     testImplementation(libs.kotlinx.coroutines.test)

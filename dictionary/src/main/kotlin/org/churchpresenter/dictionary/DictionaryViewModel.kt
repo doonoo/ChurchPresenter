@@ -12,6 +12,8 @@ import kotlinx.serialization.json.Json
 import org.churchpresenter.dictionary.data.DictionaryFiles
 import org.churchpresenter.dictionary.data.InterlinearRepository
 import org.churchpresenter.dictionary.data.InterlinearVerse
+import org.churchpresenter.dictionary.data.UserDictionaryInfo
+import org.churchpresenter.dictionary.data.UserDictionaryLibrary
 import org.churchpresenter.core.models.dictionary.StrongsEntry
 
 enum class DictionaryLanguageFilter { ALL, HEBREW, GREEK }
@@ -33,15 +35,40 @@ class DictionaryViewModel private constructor(
     private val state: DictionaryState,
     private val viewModelScope: CoroutineScope,
     selection: DictionarySelection,
+    private val sources: DictionarySources,
 ) : DictionarySelectionActions by selection,
     DictionaryPassageActions by DictionaryPassages(state, selection),
-    DictionaryBibleActions by DictionaryBibles(state, viewModelScope) {
+    DictionaryBibleActions by DictionaryBibles(state, viewModelScope),
+    DictionarySourceActions by sources {
 
-    constructor(files: DictionaryFiles = DictionaryFiles.Bundled) :
-        this(files, DictionaryState(InterlinearRepository(files)), CoroutineScope(Dispatchers.Main + SupervisorJob()))
+    /**
+     * @param library where imported dictionaries are kept; made on first use, off the event thread,
+     *   since the default resolves the app data folder.
+     */
+    constructor(
+        files: DictionaryFiles = DictionaryFiles.Bundled,
+        library: () -> UserDictionaryLibrary = UserDictionaryLibrary::inAppData,
+    ) : this(
+        files,
+        DictionaryState(InterlinearRepository(files)),
+        CoroutineScope(Dispatchers.Main + SupervisorJob()),
+        library,
+    )
 
-    private constructor(files: DictionaryFiles, state: DictionaryState, scope: CoroutineScope) :
-        this(files, state, scope, DictionarySelection(state, scope))
+    private constructor(
+        files: DictionaryFiles,
+        state: DictionaryState,
+        scope: CoroutineScope,
+        library: () -> UserDictionaryLibrary,
+    ) : this(files, state, scope, DictionarySelection(state, scope), library)
+
+    private constructor(
+        files: DictionaryFiles,
+        state: DictionaryState,
+        scope: CoroutineScope,
+        selection: DictionarySelection,
+        library: () -> UserDictionaryLibrary,
+    ) : this(files, state, scope, selection, DictionarySources(state, scope, selection, library))
 
     val dictLanguage get() = state.dictLanguage
     val dictBibleFile get() = state.dictBibleFile
@@ -66,6 +93,24 @@ class DictionaryViewModel private constructor(
     val cardBookFilter get() = state.cardBookFilter
     val cardChapterFilter get() = state.cardChapterFilter
     val searchResults: List<StrongsEntry> get() = state.searchResults
+    val userDictionaries: List<UserDictionaryInfo> get() = state.userDictionaries
+    val activeSourceId: String? get() = state.activeSourceId
+    val isImporting: Boolean get() = state.isImporting
+    val importError: DictionaryImportError? get() = state.importError
+
+    /** The imported dictionary being read, or null for Strong's. */
+    val activeDictionary: UserDictionaryInfo?
+        get() = state.activeSourceId?.let { id -> state.userDictionaries.firstOrNull { it.id == id } }
+
+    /**
+     * Whether the entries are keyed by Strong's numbers — Strong's itself, or an imported lexicon —
+     * so the language and passage filters and the interlinear have something to work on.
+     */
+    val isStrongsKeyed: Boolean get() = state.activeSourceId == null || activeDictionary?.isLexicon == true
+
+    /** What each imported lexicon says of [entry], when it is a Strong's entry; empty otherwise. */
+    fun lexiconEntriesFor(entry: StrongsEntry): List<StrongsEntry> =
+        if (entry.source.isBlank() && entry.isStrongsNumber) state.lexiconIndex[entry.number].orEmpty() else emptyList()
 
     val cardAvailableBooks: List<Int>
         get() = interlinearVerses.map { it.bookId }.distinct().sorted()
@@ -130,7 +175,15 @@ class DictionaryViewModel private constructor(
     }
 
     fun load() {
+        if (!state.dictionariesListed) {
+            state.dictionariesListed = true
+            refreshDictionaries()
+        }
         if (state.entries.isNotEmpty() || state.isLoading) return
+        if (state.activeSourceId != null) {
+            sources.loadActive()
+            return
+        }
         state.isLoading = true
         viewModelScope.launch {
             try {

@@ -3,7 +3,6 @@ package org.churchpresenter.bibletab
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.churchpresenter.bibletab.BibleViewModel.Companion.CANONICAL_BOOK_COUNT
 import org.churchpresenter.bibletab.BibleViewModel.Companion.CLICK_DEBOUNCE_MS
 import org.churchpresenter.bibletab.BibleViewModel.Companion.STANDARD_ENGLISH_BOOKS
 
@@ -19,7 +18,7 @@ suspend fun BibleViewModel.getChapterVerses(bookName: String, chapter: Int): Lis
 
 fun BibleViewModel.loadChapter(bookIndex: Int, chapter: Int) {
     _primaryBible.value?.let { bible ->
-        val bookCount = minOf(bible.getBookCount(), CANONICAL_BOOK_COUNT)
+        val bookCount = bible.getBookCount()
         if (bookCount > 0) {
             val clampedIndex = bookIndex.coerceIn(0, bookCount - 1)
             _selectedBookIndex.value = clampedIndex
@@ -96,9 +95,7 @@ internal fun BibleViewModel.booksNamedInEnglish(query: String): List<String> {
     if (!query.all { it.isLetter() && it.code < ASCII_LIMIT }) return emptyList()
     val bible = _primaryBible.value ?: return emptyList()
     return STANDARD_ENGLISH_BOOKS
-        .mapIndexedNotNull { index, englishName ->
-            (index + 1).takeIf { englishName.contains(query, ignoreCase = true) }
-        }
+        .mapNotNull { (bookId, englishName) -> bookId.takeIf { englishName.contains(query, ignoreCase = true) } }
         .mapNotNull { bookId -> bible.getBookName(bookId) }
         .filter { it in _books.value }
 }

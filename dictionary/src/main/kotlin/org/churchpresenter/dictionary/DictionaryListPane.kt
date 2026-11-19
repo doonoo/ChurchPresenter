@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -74,6 +75,7 @@ internal fun DictionaryListPane(
     viewModel: DictionaryViewModel,
     getBookName: ((bookId: Int) -> String?)?,
     searchFocus: SearchFieldFocus = remember { SearchFieldFocus() },
+    onImport: () -> Unit = {},
 ) {
     val results = viewModel.searchResults
     val listState = rememberLazyListState()
@@ -88,7 +90,11 @@ internal fun DictionaryListPane(
     }
 
     Column(modifier = modifier) {
-        LanguageChips(viewModel)
+        DictionarySourceRow(viewModel, onImport)
+        // The language chips, the Bible and the passage filter all work on Strong's numbers, which a
+        // topical dictionary such as Easton's does not have.
+        val strongsKeyed = viewModel.isStrongsKeyed
+        if (strongsKeyed) LanguageChips(viewModel) else Spacer(Modifier.height(8.dp))
 
         // Search field — capped so it doesn't stretch edge-to-edge on a wide panel.
         DictionarySearchField(
@@ -107,8 +113,10 @@ internal fun DictionaryListPane(
         // The Bible the verse rows quote, and the book / chapter filter for the entry list. The
         // filter is there from the start, its book picker disabled until the interlinear data has
         // loaded: a row that appeared only then would push the list down under the pointer.
-        BibleSelector(viewModel)
-        PassageFilterRow(viewModel, getBookName)
+        if (strongsKeyed) {
+            BibleSelector(viewModel)
+            PassageFilterRow(viewModel, getBookName)
+        }
 
         ListStatus(viewModel, results.size)
         EntryList(viewModel, results, listState)
@@ -314,25 +322,27 @@ private fun DictionaryEntryRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        // Number badge
-        Surface(
-            shape = AppShape(4.dp),
-            color = numberColor.copy(alpha = 0.12f),
-            modifier = Modifier.widthIn(min = 44.dp),
-        ) {
-            Text(
-                text = entry.number,
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold,
-                color = numberColor,
-                modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
-                maxLines = 1,
-            )
+        // Number badge -- a topical dictionary's key is internal, so its entries go without one.
+        if (entry.isStrongsNumber) {
+            Surface(
+                shape = AppShape(4.dp),
+                color = numberColor.copy(alpha = 0.12f),
+                modifier = Modifier.widthIn(min = 44.dp),
+            ) {
+                Text(
+                    text = entry.number,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = numberColor,
+                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
+                    maxLines = 1,
+                )
+            }
         }
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = entry.word,
+                text = entry.word.ifBlank { entry.definition.lineSequence().first() },
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Medium,
                 color = if (isSelected) colors.ink else MaterialTheme.colorScheme.onSurface,
@@ -340,11 +350,13 @@ private fun DictionaryEntryRow(
                 overflow = TextOverflow.Ellipsis,
             )
             Text(
-                text = entry.transliteration,
+                // A headword-only entry has no transliteration: the start of its definition goes there.
+                text = entry.transliteration.ifBlank { if (entry.word.isBlank()) "" else entry.definition },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontStyle = FontStyle.Italic,
+                fontStyle = if (entry.transliteration.isBlank()) FontStyle.Normal else FontStyle.Italic,
                 maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
         }
     }

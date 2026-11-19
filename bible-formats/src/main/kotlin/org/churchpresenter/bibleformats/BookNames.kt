@@ -1,6 +1,14 @@
 package org.churchpresenter.bibleformats
 
+import org.churchpresenter.bible.BibleCanon
+
 object BookNames {
+
+    /**
+     * The English name of book [number]: [ENGLISH] for the 66, then [BibleCanon] for the
+     * deuterocanon and the lost books. Null for a number neither lists.
+     */
+    fun english(number: Int): String? = ENGLISH[number] ?: BibleCanon.englishName(number)
 
     val ENGLISH = mapOf(
         1 to "Genesis", 2 to "Exodus", 3 to "Leviticus", 4 to "Numbers", 5 to "Deuteronomy",

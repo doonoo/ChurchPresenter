@@ -2,6 +2,8 @@
 
 package org.churchpresenter.dictionary
 
+import org.churchpresenter.dictionary.data.UserDictionaryLibrary
+import java.io.File
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
@@ -105,6 +107,10 @@ fun dictionaryTab(
      * state every other suite here runs in. A test completes it to watch the data arrive.
      */
     interlinearLoad: CompletableDeferred<Unit>? = null,
+    /** Where imported dictionaries are kept; the test home's own app data folder when null. */
+    library: UserDictionaryLibrary? = null,
+    /** What the tab's Import asks for in place of the file chooser, which a headless test cannot open. */
+    chooseDictionaryFile: suspend () -> File? = { null },
     block: ComposeUiTest.(vm: DictionaryViewModel, reports: DictionaryReports) -> Unit,
 ) {
     mockkConstructor(InterlinearRepository::class)
@@ -129,7 +135,7 @@ fun dictionaryTab(
     every { anyConstructed<InterlinearRepository>().getStrongsForBookChapter(any(), any(), any()) } answers {
         strongsForBookChapter[firstArg()] ?: emptySet()
     }
-    val vm = DictionaryViewModel(files)
+    val vm = library?.let { lib -> DictionaryViewModel(files) { lib } } ?: DictionaryViewModel(files)
     val reports = DictionaryReports()
     try {
         runComposeUiTest {
@@ -158,6 +164,7 @@ fun dictionaryTab(
                             onVerseClick = { book, chapter, verse ->
                                 reports.verseClicks += Triple(book, chapter, verse)
                             },
+                            chooseDictionaryFile = chooseDictionaryFile,
                         )
                         }
                         }

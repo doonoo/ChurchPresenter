@@ -49,6 +49,7 @@ import org.churchpresenter.icons.generated.resources.Res as IconRes
 import org.churchpresenter.strings.generated.resources.Res
 import org.churchpresenter.strings.generated.resources.add_to_schedule
 import org.churchpresenter.strings.generated.resources.dictionary_definition
+import org.churchpresenter.strings.generated.resources.dictionary_in_your_lexicons
 import org.churchpresenter.strings.generated.resources.dictionary_filter_greek
 import org.churchpresenter.strings.generated.resources.dictionary_filter_hebrew
 import org.churchpresenter.strings.generated.resources.dictionary_back
@@ -102,6 +103,10 @@ internal fun DictionaryDetailPane(
     getEntry: ((strongsNumber: String) -> StrongsEntry?)?,
     onAddToSchedule: ((StrongsEntry) -> Unit)?,
     onGoLive: ((StrongsEntry) -> Unit)?,
+    /** Whether the EN/RU switch applies: it changes Strong's own text, not an imported dictionary's. */
+    showsLanguageToggle: Boolean = true,
+    /** What each imported lexicon says of [entry]. */
+    lexiconEntries: List<StrongsEntry> = emptyList(),
 ) {
     Column(modifier = modifier) {
         DictionaryDetailActionRow(
@@ -111,7 +116,7 @@ internal fun DictionaryDetailPane(
             onGoBack = onGoBack,
             onGoForward = onGoForward,
             dictLanguage = dictLanguage,
-            onToggleDictLanguage = onToggleDictLanguage,
+            onToggleDictLanguage = onToggleDictLanguage.takeIf { showsLanguageToggle },
             onAddToSchedule = onAddToSchedule,
             onGoLive = onGoLive,
         )
@@ -141,8 +146,13 @@ internal fun DictionaryDetailPane(
                         .padding(24.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    StrongsEntrySummary(entry = entry, onStrongsClick = onWordClick)
-                    InScriptureSection(
+                    if (entry.isStrongsNumber) {
+                        StrongsEntrySummary(entry = entry, onStrongsClick = onWordClick)
+                    } else {
+                        TopicalEntrySummary(entry = entry, onStrongsClick = onWordClick)
+                    }
+                    if (lexiconEntries.isNotEmpty()) LexiconSections(lexiconEntries, onWordClick)
+                    if (entry.isStrongsNumber) InScriptureSection(
                         highlightedNumber = entry.number,
                         interlinearVerses = interlinearVerses,
                         totalInterlinearCount = totalInterlinearCount,
@@ -191,7 +201,7 @@ private fun DictionaryDetailActionRow(
     onGoBack: () -> Unit,
     onGoForward: () -> Unit,
     dictLanguage: String,
-    onToggleDictLanguage: () -> Unit,
+    onToggleDictLanguage: (() -> Unit)?,
     onAddToSchedule: ((StrongsEntry) -> Unit)?,
     onGoLive: ((StrongsEntry) -> Unit)?,
 ) {
@@ -227,7 +237,7 @@ private fun DictionaryDetailActionRow(
             containerColor = MaterialTheme.colorScheme.surfaceVariant,
             contentColor = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        TooltipArea(
+        if (onToggleDictLanguage != null) TooltipArea(
             tooltip = {
                 Surface(
                     color = MaterialTheme.colorScheme.inverseSurface,
@@ -322,32 +332,36 @@ private fun StrongsEntrySummary(
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
             )
         }
+        if (entry.source.isNotBlank()) SourceLabel(entry.source)
     }
 
     HorizontalDivider()
 
-    // Original word — large display
-    Text(
-        text = entry.word,
-        fontSize = 52.sp,
-        fontWeight = FontWeight.Light,
-        color = MaterialTheme.colorScheme.onSurface,
-        lineHeight = 60.sp,
-    )
+    // Original word — large display. An imported lexicon may file its entries under the number alone.
+    if (entry.word.isNotBlank()) {
+        Text(
+            text = entry.word,
+            fontSize = 52.sp,
+            fontWeight = FontWeight.Light,
+            color = MaterialTheme.colorScheme.onSurface,
+            lineHeight = 60.sp,
+        )
+    }
 
     // Transliteration + pronunciation
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        DetailRow(
-            label = stringResource(Res.string.dictionary_transliteration),
-            value = entry.transliteration,
-        )
-        DetailRow(
-            label = stringResource(Res.string.dictionary_pronunciation),
-            value = entry.pronunciation,
-        )
+    if (entry.transliteration.isNotBlank() || entry.pronunciation.isNotBlank()) {
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            DetailRow(
+                label = stringResource(Res.string.dictionary_transliteration),
+                value = entry.transliteration,
+            )
+            DetailRow(
+                label = stringResource(Res.string.dictionary_pronunciation),
+                value = entry.pronunciation,
+            )
+        }
+        HorizontalDivider()
     }
-
-    HorizontalDivider()
 
     DetailSection(
         label = stringResource(Res.string.dictionary_definition),
@@ -360,6 +374,59 @@ private fun StrongsEntrySummary(
         DetailSection(
             label = stringResource(Res.string.dictionary_kjv_usage),
             body = entry.kjvUsage,
+            onStrongsClick = onStrongsClick,
+        )
+    }
+}
+
+/** An imported dictionary's entry: its dictionary, its headword, and what it says. */
+@Composable
+private fun TopicalEntrySummary(entry: StrongsEntry, onStrongsClick: ((String) -> Unit)?) {
+    SourceLabel(entry.source)
+    if (entry.word.isNotBlank()) {
+        Text(
+            text = entry.word,
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+    }
+    HorizontalDivider()
+    DetailSection(
+        label = stringResource(Res.string.dictionary_definition),
+        body = entry.definition,
+        onStrongsClick = onStrongsClick,
+    )
+}
+
+/** The name of the dictionary an entry comes from, as a small badge. */
+@Composable
+private fun SourceLabel(source: String) {
+    Surface(shape = AppShape(4.dp), color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)) {
+        Text(
+            text = source,
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+        )
+    }
+}
+
+/** What each imported lexicon says of a Strong's entry, one section a lexicon, under one heading. */
+@Composable
+private fun LexiconSections(entries: List<StrongsEntry>, onStrongsClick: ((String) -> Unit)?) {
+    HorizontalDivider()
+    Text(
+        text = stringResource(Res.string.dictionary_in_your_lexicons),
+        style = MaterialTheme.typography.titleSmall,
+        fontWeight = FontWeight.SemiBold,
+        color = MaterialTheme.colorScheme.onSurface,
+    )
+    entries.forEach { lexicon ->
+        DetailSection(
+            label = listOf(lexicon.source, lexicon.word).filter { it.isNotBlank() }.joinToString(" · "),
+            body = lexicon.definition,
             onStrongsClick = onStrongsClick,
         )
     }

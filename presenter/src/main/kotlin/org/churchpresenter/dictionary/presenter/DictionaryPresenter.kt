@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -52,6 +53,9 @@ import org.churchpresenter.sharedui.presenter.BoxFitText
 import org.churchpresenter.sharedui.presenter.BoxedItem
 import org.churchpresenter.sharedui.presenter.fitInBox
 import org.churchpresenter.sharedui.presenter.rectIn
+import org.churchpresenter.strings.generated.resources.Res
+import org.churchpresenter.strings.generated.resources.dictionary_source_strongs
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun DictionaryPresenter(
@@ -102,6 +106,7 @@ private fun DictionaryPresenterContent(
     }
 
     val density = LocalDensity.current
+    val strongsLabel = stringResource(Res.string.dictionary_source_strongs)
 
     fun wordShadow(): Shadow? {
         if (!ds.wordShadow) return null
@@ -156,7 +161,7 @@ private fun DictionaryPresenterContent(
                     outline = ds.referenceOutline,
                     scaleFactor = 1f,
                     fillWidth = false,
-                    text = entry.number,
+                    text = entry.shownReference,
                     color = referenceColor,
                     fontSize = (ds.referenceFontSize * scale).sp,
                     fontFamily = refFontFamily,
@@ -221,6 +226,61 @@ private fun DictionaryPresenterContent(
                 )
             }
 
+            // The imported lexicons' entries, laid beside the definition when the profile asks for them.
+            val lexicons = if (ds.showLexicons) entry.companions.filter { it.definition.isNotBlank() } else emptyList()
+
+            /** One column of the side-by-side definitions: whose it is, then what it says. */
+            @Composable
+            fun DefinitionColumn(modifier: Modifier, label: String, text: String, share: Float) {
+                Column(
+                    modifier = modifier,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(itemSpacing / HALF),
+                ) {
+                    OutlinedText(
+                        outline = ds.referenceOutline,
+                        scaleFactor = 1f,
+                        fillWidth = false,
+                        text = label,
+                        color = referenceColor,
+                        fontSize = (ds.referenceFontSize * COLUMN_LABEL_SHARE).sp,
+                        fontFamily = refFontFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        textAlign = TextAlign.Center,
+                        style = TextStyle(shadow = refShadow()),
+                    )
+                    OutlinedText(
+                        outline = ds.definitionOutline,
+                        scaleFactor = 1f,
+                        fillWidth = false,
+                        text = text,
+                        color = definitionColor,
+                        fontSize = (ds.definitionFontSize * share).sp,
+                        fontFamily = wordFontFamily,
+                        textAlign = TextAlign.Center,
+                        lineHeight = (ds.definitionFontSize * share * LINE_HEIGHT_SHARE).sp,
+                        style = TextStyle(),
+                    )
+                }
+            }
+
+            /** Strong's definition and each lexicon's, side by side, each a little smaller the more there are. */
+            @Composable
+            fun DefinitionColumns() {
+                val share = if (lexicons.size > 1) MANY_COLUMNS_SHARE else TWO_COLUMNS_SHARE
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(innerPaddingH / HALF),
+                    verticalAlignment = Alignment.Top,
+                ) {
+                    val ownLabel = entry.source.ifBlank { strongsLabel }
+                    DefinitionColumn(Modifier.weight(1f), ownLabel, entry.definition, share)
+                    lexicons.forEach { lexicon ->
+                        DefinitionColumn(Modifier.weight(1f), lexicon.source, lexicon.definition, share)
+                    }
+                }
+            }
+
             @Composable
             fun KjvPart(scale: Float) {
                 OutlinedText(
@@ -267,7 +327,7 @@ private fun DictionaryPresenterContent(
                 // Definition
                 if (definitionInCard) {
                     Spacer(Modifier.height((itemSpacing.value / HALF).coerceAtLeast(MIN_DEFINITION_GAP).dp))
-                    DefinitionPart(1f)
+                    if (lexicons.isEmpty()) DefinitionPart(1f) else DefinitionColumns()
                 }
                 // KJV usage
                 if (kjvInCard) KjvPart(1f)
@@ -295,7 +355,7 @@ private fun DictionaryPresenterContent(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) { content(scale) }
                 }
             }
-            val referenceText = entry.number + "\n" + translit
+            val referenceText = entry.shownReference + "\n" + translit
             Boxed(DICTIONARY_REFERENCE_BOX, showsReference, referenceText, ds.referenceFontSize) { scale ->
                 NumberPart(scale)
                 if (translit.isNotBlank()) TranslitPart(scale)
@@ -312,6 +372,13 @@ private fun DictionaryPresenterContent(
 /** The gap above the definition: half the card's spacing, and never less than [MIN_DEFINITION_GAP] dp. */
 private const val HALF = 2f
 private const val MIN_DEFINITION_GAP = 2f
+
+/** The definitions' size beside one lexicon, and beside two or more, as a share of the definition's own. */
+private const val TWO_COLUMNS_SHARE = 0.85f
+private const val MANY_COLUMNS_SHARE = 0.7f
+
+/** A side-by-side column's label (Strong's, Thayer's…), as a share of the reference's size. */
+private const val COLUMN_LABEL_SHARE = 0.7f
 
 /** The transliteration's size, as a share of the reference's. */
 private const val TRANSLIT_SHARE = 0.85f

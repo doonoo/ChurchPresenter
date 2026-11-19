@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import org.churchpresenter.bible.Bible
 import org.churchpresenter.dictionary.data.InterlinearRepository
 import org.churchpresenter.dictionary.data.InterlinearVerse
+import org.churchpresenter.dictionary.data.UserDictionaryInfo
 import org.churchpresenter.core.models.dictionary.StrongsEntry
 
 /**
@@ -24,6 +25,16 @@ internal class DictionaryState(val interlinear: InterlinearRepository) {
     var searchQuery by mutableStateOf("")
     var filterLanguage by mutableStateOf(DictionaryLanguageFilter.ALL)
     var selectedEntry by mutableStateOf<StrongsEntry?>(null)
+
+    /** The dictionaries the operator imported, and which one the tab reads: null is Strong's. */
+    var userDictionaries by mutableStateOf<List<UserDictionaryInfo>>(emptyList())
+    var activeSourceId by mutableStateOf<String?>(null)
+    var dictionariesListed = false
+
+    /** Every imported lexicon's entries by Strong's number — what each says of the entry shown. */
+    var lexiconIndex by mutableStateOf<Map<String, List<StrongsEntry>>>(emptyMap())
+    var isImporting by mutableStateOf(false)
+    var importError by mutableStateOf<DictionaryImportError?>(null)
 
     /** Back/Forward navigation history, as Strong's numbers. */
     val history = mutableListOf<String>()
@@ -73,6 +84,8 @@ internal class DictionaryState(val interlinear: InterlinearRepository) {
             return passageFiltered.filter { entry ->
                 entry.number.lowercase().contains(lower) ||
                     entry.word.contains(q) ||
+                    // A Strong's word is compared as typed; an imported headword ("Aaron") is not.
+                    (!entry.isStrongsNumber && entry.word.lowercase().contains(lower)) ||
                     entry.transliteration.lowercase().contains(lower) ||
                     entry.pronunciation.lowercase().contains(lower) ||
                     entry.definition.lowercase().contains(lower)

@@ -18,7 +18,12 @@ import org.churchpresenter.dictionary.DictionaryFixture
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
+import kotlin.test.AfterTest
 import kotlin.test.Test
+import org.churchpresenter.dictionary.DictionaryViewModel
+import org.churchpresenter.dictionary.data.UserDictionaryLibrary
+import java.io.File
+import java.nio.file.Files
 import org.churchpresenter.sharedui.screenshot.captureTo
 import org.churchpresenter.sharedui.screenshot.stackedThemes
 
@@ -49,7 +54,8 @@ class DictionaryTabScreenshotTest {
         withOnGoLive: Boolean = true,
         width: Dp? = null,
         rootIndex: Int = 0,
-        drive: ComposeUiTest.() -> Unit = {},
+        library: UserDictionaryLibrary? = null,
+        drive: ComposeUiTest.(DictionaryViewModel) -> Unit = {},
     ) = stackedThemes(SECTION, name) { mode, file ->
         dictionaryTab(
             verses = verses,
@@ -64,11 +70,59 @@ class DictionaryTabScreenshotTest {
             withOnGoLive = withOnGoLive,
             width = width,
             themeMode = mode,
-        ) { _, _ ->
-            drive()
+            library = library,
+        ) { vm, _ ->
+            drive(vm)
             waitForIdle()
             captureTo(file, rootIndex)
         }
+    }
+
+    /** A library holding Easton's (topical) and Thayer's (a lexicon), in a folder of its own. */
+    private fun importedLibrary(): UserDictionaryLibrary {
+        val root = Files.createTempDirectory("cp-dictionary-shots").toFile().also { libraryRoots += it }
+        return UserDictionaryLibrary(File(root, "dictionaries")).apply {
+            import(
+                File(root, "eastons.json").apply {
+                    writeText(
+                        """{"name":"Easton's Bible Dictionary","entries":[
+                        {"word":"Aaron","definition":"The eldest son of Amram and Jochebed, a daughter of Levi (Ex. 6:20)."},
+                        {"word":"Abba","definition":"A Syriac or Chaldee word, translated father (Mark 14:36)."},
+                        {"word":"Abel","definition":"Keeper of sheep (Gen. 4:2); the second son of Adam and Eve."}]}"""
+                    )
+                },
+            )
+            import(
+                File(root, "thayer.tsv").apply {
+                    writeText("strongs\tlemma\tdefinition\nG26\tἀγάπη\taffection, good-will, love, benevolence\n")
+                },
+                name = "Thayer's Greek Lexicon",
+            )
+        }
+    }
+
+    private val libraryRoots = mutableListOf<File>()
+
+    @AfterTest
+    fun deleteLibraries() {
+        libraryRoots.forEach { it.deleteRecursively() }
+        libraryRoots.clear()
+    }
+
+    @Test
+    fun `an imported dictionary`() = shoot("imported_dictionary", library = importedLibrary()) { vm ->
+        waitUntil("the library to be listed") { vm.userDictionaries.size == 2 }
+        vm.selectSource(vm.userDictionaries.first().id)
+        waitUntil("Easton's to load") { vm.entries.size == 3 }
+        vm.onEntrySelected(vm.entries.first())
+    }
+
+    @Test
+    fun `a Strong's entry with what a lexicon says of it`() =
+        shoot("strongs_with_lexicon", library = importedLibrary()) { vm ->
+        val g26 = vm.entries.first { it.number == "G26" }
+        waitUntil("the lexicons to be indexed") { vm.lexiconEntriesFor(g26).isNotEmpty() }
+        vm.onEntrySelected(g26)
     }
 
     // ── The list ────────────────────────────────────────────────────────────────────────────────

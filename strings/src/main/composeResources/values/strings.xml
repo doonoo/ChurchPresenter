@@ -595,8 +595,15 @@
     <string name="book_names_failed_title">This Bible file could not be read.</string>
     <string name="book_names_failed_text">Its book names could not be extracted, so English names are listed. You can still set your own.</string>
     <string name="book_names_filter_all">All</string>
+    <string name="book_names_filter_extra">Apocrypha &amp; lost books</string>
     <string name="book_names_old_testament">Old Testament</string>
     <string name="book_names_new_testament">New Testament</string>
+    <string name="bible_section_old_testament">Old Testament</string>
+    <string name="bible_section_new_testament">New Testament</string>
+    <string name="bible_section_deuterocanon">Apocrypha</string>
+    <string name="bible_section_ot_pseudepigrapha">Lost Books</string>
+    <string name="bible_section_nt_apocrypha">New Testament Apocrypha</string>
+    <string name="bible_section_other">Other Books</string>
     <string name="book_names_overridden">Overridden</string>
     <string name="book_names_find">Find a book</string>
     <string name="book_names_book">Book</string>
@@ -1909,6 +1916,7 @@
     <string name="bible_catalog_testament_new">NT</string>
     <string name="bible_catalog_testament_old">OT</string>
     <string name="bible_catalog_testament_full">OT+NT</string>
+    <string name="bible_catalog_apocrypha">+ Apocrypha (%1$d books)</string>
     <string name="bible_catalog_license_subtitle">Confirm you may use this translation</string>
     <string name="bible_catalog_license_field_source">Source</string>
     <string name="bible_catalog_license_field_identifier">Identifier</string>
@@ -2578,6 +2586,18 @@
     <string name="dictionary_bible_primary">Primary Bible</string>
     <string name="dictionary_bible_select">Select Bible translation</string>
     <string name="dictionary_go_to_verse">Go to verse in Bible tab</string>
+    <string name="dictionary_source_label">Dictionary</string>
+    <string name="dictionary_source_strongs">Strong's Concordance</string>
+    <string name="dictionary_import">Import dictionary or lexicon…</string>
+    <string name="dictionary_import_title">Import a dictionary or lexicon</string>
+    <string name="dictionary_import_filter">Dictionaries and lexicons</string>
+    <string name="dictionary_importing">Importing…</string>
+    <string name="dictionary_import_failed">Could not import %1$s: %2$s</string>
+    <string name="dictionary_remove">Remove this dictionary</string>
+    <string name="dictionary_remove_title">Remove %1$s?</string>
+    <string name="dictionary_remove_text">Its copy in ChurchPresenter is deleted. The file you imported it from is not touched.</string>
+    <string name="dictionary_in_your_lexicons">In your lexicons</string>
+    <string name="profile_dict_lexicons">Imported lexicons beside Strong's</string>
     <string name="em_dash">—</string>
     <!-- Contact / feedback form (Help → Contact) -->
     <string name="menu_contact_us">Contact</string>
