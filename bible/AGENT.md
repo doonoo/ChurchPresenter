@@ -44,6 +44,7 @@ that trap before this module existed.
 | `SpbFormat.kt` | the `.spb` format itself — the six helpers that are pure functions of the file |
 | `BibleBook.kt`, `BibleVerse.kt`, `BibleSearch.kt` | the three row types the API hands back |
 | `BibleTranslationNames.kt` | reading a module's title without loading it |
+| `BibleCanon.kt` | every book number the app knows — the 66, the deuterocanon (67–99, Zefania's numbers for 67–84), the OT pseudepigrapha (100–199) and the NT apocrypha (200–299) — with its USFM code, English name and `CanonSection`. **A number, once given, is never moved or reused**: converters write it into users' files |
 
 ## Test fixtures published from here
 

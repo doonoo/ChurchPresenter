@@ -197,6 +197,7 @@ object EBibleSource : BibleSource {
         val languageNameIndex = index("languageName")
         val otBooksIndex = index("OTbooks")
         val ntBooksIndex = index("NTbooks")
+        val dcBooksIndex = index("DCbooks")
 
         val taken = mutableSetOf<String>()
         return rows.drop(1)
@@ -227,7 +228,8 @@ object EBibleSource : BibleSource {
                     // read it off the title.
                     otBookCount = cell(otBooksIndex).toIntOrNull() ?: 0,
                     ntBookCount = cell(ntBooksIndex).toIntOrNull() ?: 0,
-                    fileStem = BibleCatalogNaming.fileStem(language, translationId)
+                    fileStem = BibleCatalogNaming.fileStem(language, translationId),
+                    dcBookCount = cell(dcBooksIndex).toIntOrNull() ?: 0,
                 )
             }
             // Deduplicated in catalogue order, so every machine derives the same installed names.

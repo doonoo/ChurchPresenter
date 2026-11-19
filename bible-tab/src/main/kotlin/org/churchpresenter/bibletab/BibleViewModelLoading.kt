@@ -58,7 +58,7 @@ internal fun BibleViewModel.updateSettings(newSettings: AppSettings) {
             primary.applyNameOverride(name, abbreviation)
             primary.applyBookNameOverrides(settings.bookNameOverridesOf(fileName))
         }
-        _books.value = primary.getCanonicalBooks()
+        showBooksOf(primary)
         refreshFilteredLists()
     }
     if (_verses.value.isNotEmpty()) _verseSelectionToken.value++
@@ -268,7 +268,7 @@ internal fun BibleViewModel.loadBibles() {
 
             if (booksOnlyBible != null && booksOnlyBible.getBookCount() > 0) {
                 _primaryBible.value = booksOnlyBible
-                _books.value = booksOnlyBible.getCanonicalBooks()
+                showBooksOf(booksOnlyBible)
                 refreshFilteredLists()
             }
 
@@ -306,6 +306,7 @@ internal fun BibleViewModel.loadBibles() {
                 onBibleLoaded?.invoke(primary, configuredTranslations.firstOrNull()?.fileName.orEmpty())
             } else if (booksOnlyBible == null) {
                 _books.value = emptyList()
+                _bookSections.value = emptyList()
                 _verses.value = emptyList()
                 refreshFilteredLists()
             }
@@ -367,9 +368,9 @@ private fun BibleViewModel.resolveTranslationSources(
 
 /** Points the book list, selection and verses at a freshly loaded primary module. */
 private suspend fun BibleViewModel.applyLoadedPrimary(primary: Bible, previousBookId: Int?) {
-    _books.value = primary.getCanonicalBooks()
+    showBooksOf(primary)
 
-    val bookCount = minOf(primary.getBookCount(), BibleViewModel.CANONICAL_BOOK_COUNT)
+    val bookCount = primary.getBookCount()
     val fallbackIndex = _selectedBookIndex.value.coerceIn(0, (bookCount - 1).coerceAtLeast(0))
     val clampedBookIndex = if (previousBookId != null) {
         (0 until bookCount).firstOrNull { primary.getBookId(it) == previousBookId } ?: fallbackIndex

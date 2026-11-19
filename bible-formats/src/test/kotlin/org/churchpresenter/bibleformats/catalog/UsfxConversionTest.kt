@@ -64,13 +64,29 @@ class UsfxConversionTest {
     // --- book codes ---
 
     @Test
-    fun `books outside the canon are left out rather than mis-numbered`() {
-        // Deuterocanonical books have no slot in the 66-book numbering the app uses. The mapping
-        // itself is `internal` to the :converter module and pinned by its own UsfxToSpbConverterTest;
-        // what this asserts is what comes out of the conversion the app actually runs.
+    fun `the deuterocanon and the lost books convert under their canon numbers`() {
         val bible = parse(
             """<book id="GEN"><c id="1"/><v id="1"/>In the beginning<ve/></book>""" +
-                """<book id="TOB"><c id="1"/><v id="1"/>Tobit text<ve/></book>"""
+                """<book id="TOB"><c id="1"/><v id="1"/>Tobit text<ve/></book>""" +
+                """<book id="ENO"><c id="1"/><v id="1"/>Enoch text<ve/></book>"""
+        )
+
+        assertEquals(listOf(1, 69, 100), bible.books.map { it.number })
+    }
+
+    @Test
+    fun `an extra book with no name in BookNames xml falls back to its English name`() {
+        val bible = parse("""<book id="JUB"><c id="1"/><v id="1"/>Jubilees text<ve/></book>""")
+
+        assertEquals("Jubilees", bible.books.single().name)
+    }
+
+    @Test
+    fun `front matter and codes no canon lists are still left out`() {
+        val bible = parse(
+            """<book id="FRT"><c id="1"/><v id="1"/>Preface<ve/></book>""" +
+                """<book id="ZZZ"><c id="1"/><v id="1"/>Unknown<ve/></book>""" +
+                """<book id="GEN"><c id="1"/><v id="1"/>In the beginning<ve/></book>"""
         )
 
         assertEquals(listOf(1), bible.books.map { it.number })

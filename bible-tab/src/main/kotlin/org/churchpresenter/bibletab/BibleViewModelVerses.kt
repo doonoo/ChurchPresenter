@@ -4,7 +4,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.core.models.bible.SelectedVerse
-import org.churchpresenter.bibletab.BibleViewModel.Companion.CANONICAL_BOOK_COUNT
 
 suspend fun BibleViewModel.getVersesForDisplay(bookName: String, chapter: Int, verseNum: Int): List<SelectedVerse> {
     val primaryBible = _primaryBible.value ?: return emptyList()
@@ -185,7 +184,7 @@ internal suspend fun BibleViewModel.applyVerseSelection(
     goLiveSource: String?,
 ) {
     val bible = _primaryBible.value ?: return
-    val bookCount = minOf(bible.getBookCount(), CANONICAL_BOOK_COUNT)
+    val bookCount = bible.getBookCount()
     if (bookCount == 0) return
 
     val clampedIndex = bookIndex.coerceIn(0, bookCount - 1)

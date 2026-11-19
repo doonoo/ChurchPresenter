@@ -26,10 +26,12 @@ class BibleViewModelReferenceLiveTest {
     }
 
     @Test
-    fun `the standard English names run from Genesis to Revelation, and no further`() {
-        assertEquals("genesis", standardEnglishBookName(1)?.lowercase())
-        assertEquals("revelation", standardEnglishBookName(66)?.lowercase())
+    fun `the standard English names cover the sixty-six and the extra books, and nothing unlisted`() {
+        assertEquals("genesis", standardEnglishBookName(1))
+        assertEquals("revelation", standardEnglishBookName(66))
+        assertEquals("judith", standardEnglishBookName(67))
+        assertEquals("1 enoch", standardEnglishBookName(100))
         assertNull(standardEnglishBookName(0))
-        assertNull(standardEnglishBookName(67))
+        assertNull(standardEnglishBookName(999))
     }
 }

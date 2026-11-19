@@ -597,6 +597,12 @@
     <string name="book_names_filter_all">All</string>
     <string name="book_names_old_testament">Old Testament</string>
     <string name="book_names_new_testament">New Testament</string>
+    <string name="bible_section_old_testament">Old Testament</string>
+    <string name="bible_section_new_testament">New Testament</string>
+    <string name="bible_section_deuterocanon">Apocrypha</string>
+    <string name="bible_section_ot_pseudepigrapha">Lost Books</string>
+    <string name="bible_section_nt_apocrypha">New Testament Apocrypha</string>
+    <string name="bible_section_other">Other Books</string>
     <string name="book_names_overridden">Overridden</string>
     <string name="book_names_find">Find a book</string>
     <string name="book_names_book">Book</string>
@@ -1909,6 +1915,7 @@
     <string name="bible_catalog_testament_new">NT</string>
     <string name="bible_catalog_testament_old">OT</string>
     <string name="bible_catalog_testament_full">OT+NT</string>
+    <string name="bible_catalog_apocrypha">+ Apocrypha (%1$d books)</string>
     <string name="bible_catalog_license_subtitle">Confirm you may use this translation</string>
     <string name="bible_catalog_license_field_source">Source</string>
     <string name="bible_catalog_license_field_identifier">Identifier</string>

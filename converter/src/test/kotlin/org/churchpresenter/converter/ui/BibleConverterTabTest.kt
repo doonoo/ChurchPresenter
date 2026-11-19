@@ -36,7 +36,7 @@ class BibleConverterTabTest {
             setConverterContent(pickers) { BibleConverterTab(onConverted = { converted += it }) }
 
             click(Strings.selectXmlFiles)
-            assertEquals(listOf("xml"), pickers.requestedExtensions)
+            assertEquals(listOf("xml", "osis", "usfx", "txt"), pickers.requestedExtensions)
             assertTrue(isShowing(Strings.fileCount(1)))
 
             click(Strings.preview)

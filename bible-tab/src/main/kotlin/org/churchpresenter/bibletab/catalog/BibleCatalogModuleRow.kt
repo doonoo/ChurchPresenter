@@ -46,6 +46,7 @@ import org.churchpresenter.strings.generated.resources.bible_catalog_download
 import org.churchpresenter.strings.generated.resources.bible_catalog_installed
 import org.churchpresenter.strings.generated.resources.bible_catalog_redownload
 import org.churchpresenter.strings.generated.resources.bible_catalog_size_mb
+import org.churchpresenter.strings.generated.resources.bible_catalog_apocrypha
 import org.churchpresenter.strings.generated.resources.bible_catalog_testament_full
 import org.churchpresenter.strings.generated.resources.bible_catalog_testament_new
 import org.churchpresenter.strings.generated.resources.bible_catalog_testament_old
@@ -252,6 +253,7 @@ internal fun moduleSubtitle(module: BibleModule, showDate: Boolean): String {
     val parts = mutableListOf<String>()
     if (module.identifier.isNotBlank()) parts.add(module.identifier)
     if (module.language.isNotBlank()) parts.add(module.language)
+    if (module.hasApocrypha) parts.add(stringResource(Res.string.bible_catalog_apocrypha, module.dcBookCount))
     if (module.sizeBytes > 0) {
         val megabytes = "%.1f".format(module.sizeBytes / (1024.0 * 1024.0))
         parts.add(stringResource(Res.string.bible_catalog_size_mb, megabytes))

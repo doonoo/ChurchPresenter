@@ -344,10 +344,14 @@ object XmlToSpbConverter {
     }
 
     private fun getBookName(bookElem: org.w3c.dom.Node, bookNum: Int, language: String?): String {
-        val canonical = BookNames.ENGLISH[bookNum] ?: "Book $bookNum"
+        val canonical = BookNames.english(bookNum) ?: "Book $bookNum"
         if (language == "ENG") declaredName(bookElem)?.let { return it }
         if (language != null && language in BookNames.LANGUAGE_LOOKUPS) {
-            return BookNames.LANGUAGE_LOOKUPS[language]?.get(bookNum) ?: canonical
+            // The curated tables cover the 66 only. Past them the module's own name is the only
+            // one in its language, so it comes before the English fallback.
+            return BookNames.LANGUAGE_LOOKUPS[language]?.get(bookNum)
+                ?: declaredName(bookElem)
+                ?: canonical
         }
         return captionName(bookElem) ?: canonical
     }

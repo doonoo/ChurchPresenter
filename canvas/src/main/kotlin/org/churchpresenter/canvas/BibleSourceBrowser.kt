@@ -8,9 +8,6 @@ import androidx.compose.runtime.setValue
 import org.churchpresenter.bible.Bible
 import java.io.File
 
-/** The canonical books, as the Bible tab lists them: the 66, not a module's apocrypha. */
-private const val CANONICAL_BOOK_COUNT = 66
-
 /**
  * The translation a scene's Bible source is picked from, and where its picker is paged to: a book,
  * a chapter and that chapter's verses. Read straight off [bible] -- the Bible tab's view model is
@@ -18,7 +15,8 @@ private const val CANONICAL_BOOK_COUNT = 66
  */
 @Stable
 internal class BibleSourceBrowser(val bible: Bible?) {
-    val books: List<String> = bible?.getBooks()?.take(CANONICAL_BOOK_COUNT).orEmpty()
+    /** Every book the module carries, as the Bible tab lists them: the 66 and any apocrypha or lost books. */
+    val books: List<String> = bible?.getBooks().orEmpty()
 
     var selectedBookIndex by mutableIntStateOf(0)
         private set

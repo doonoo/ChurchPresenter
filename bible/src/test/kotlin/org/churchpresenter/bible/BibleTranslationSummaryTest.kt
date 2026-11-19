@@ -57,6 +57,35 @@ class BibleTranslationSummaryTest {
     }
 
     @Test
+    fun `a module with the Apocrypha or lost books reports its extra books`() {
+        val summary = summaryOf(
+            """
+            ##Title: Lost Books
+            1 Genesis 50
+            69 Tobit 14
+            100 1 Enoch 108
+            -----
+            """.trimIndent()
+        )
+        assertTrue(summary!!.hasOldTestament)
+        assertFalse(summary.hasNewTestament)
+        assertTrue(summary.hasExtraBooks)
+    }
+
+    @Test
+    fun `a book number no table lists still counts as an extra book`() {
+        val summary = summaryOf("##Title: Odd\n900 Unknown Scroll 3\n-----\n")
+        assertFalse(summary!!.hasOldTestament)
+        assertTrue(summary.hasExtraBooks)
+    }
+
+    @Test
+    fun `the sixty-six alone report no extra books`() {
+        val summary = summaryOf("##Title: KJV\n1 Genesis 50\n66 Revelation 22\n-----\n")
+        assertFalse(summary!!.hasExtraBooks)
+    }
+
+    @Test
     fun `a New Testament only module reports no Old Testament`() {
         // Book ids 40-66 are the New Testament; nothing below 40 appears here.
         val summary = summaryOf(

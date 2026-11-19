@@ -60,6 +60,8 @@ import androidx.compose.ui.input.pointer.isSecondary
 import androidx.compose.ui.input.pointer.isShiftPressed
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -333,6 +335,8 @@ internal fun BibleBrowserColumn(
     singleLine: Boolean = false,
     centerText: Boolean = false,
     rowHeight: Dp = 32.dp,
+    /** A heading drawn above the row at each position — the book list's Apocrypha and Lost Books. */
+    sectionHeaders: Map<Int, String> = emptyMap(),
     onItemSelected: (Int) -> Unit
 ) {
     val listState = rememberLazyListState()
@@ -357,6 +361,8 @@ internal fun BibleBrowserColumn(
                 val isSelected = index == selectedIndex
                 val (hover, hovered) = rememberRowHover()
                 val colors = bibleRowColors(isSelected, hovered)
+                // Inside the row's own item, so a heading never shifts the index a row scrolls to.
+                sectionHeaders[index]?.let { BibleSectionHeading(it, first = index == 0) }
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -388,6 +394,22 @@ internal fun BibleBrowserColumn(
             adapter = rememberScrollbarAdapter(listState)
         )
     }
+}
+
+/** A section's name above its first row: small, quiet, and not a thing to click. */
+@Composable
+private fun BibleSectionHeading(text: String, first: Boolean) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelSmall,
+        fontWeight = FontWeight.SemiBold,
+        color = MaterialTheme.colorScheme.primary,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.fillMaxWidth()
+            .semantics { heading() }
+            .padding(start = rowPad(10.dp), top = if (first) 2.dp else 10.dp, bottom = 2.dp),
+    )
 }
 
 /**

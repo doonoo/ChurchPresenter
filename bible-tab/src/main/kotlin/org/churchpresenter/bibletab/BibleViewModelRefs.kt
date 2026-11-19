@@ -6,15 +6,22 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.bible.Bible
-import org.churchpresenter.bibletab.BibleViewModel.Companion.CANONICAL_BOOK_COUNT
+import org.churchpresenter.bible.BibleCanon
 
-internal fun Bible.getCanonicalBooks(): List<String> = getBooks().take(BibleViewModel.CANONICAL_BOOK_COUNT)
+/**
+ * Points the book list at every book [bible] carries, in its own order — the 66 and whatever else it
+ * has: the Apocrypha, the pseudepigrapha, the New Testament apocrypha — with the section each is in.
+ */
+internal fun BibleViewModel.showBooksOf(bible: Bible) {
+    _books.value = bible.getBooks()
+    _bookSections.value = (0 until bible.getBookCount()).map { BibleCanon.sectionOf(bible.getBookId(it)) }
+}
 
 fun BibleViewModel.selectVerseByBookId(bookId: Int, chapter: Int, verseNumber: Int) {
     val bible = _primaryBible.value ?: return
     val displayIndex = bible.getDisplayIndexForBookId(bookId)
     if (displayIndex < 0) return
-    val bookCount = minOf(bible.getBookCount(), CANONICAL_BOOK_COUNT)
+    val bookCount = bible.getBookCount()
     val clamped = displayIndex.coerceIn(0, bookCount - 1)
 
     searchJob?.cancel()

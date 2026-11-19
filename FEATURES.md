@@ -59,6 +59,7 @@
 - **Search the whole Bible** — search across the entire text or just the current book.
 - **History** — jump back to recently shown passages instantly.
 - **Cross references** — see the passages that cross-reference the verse you are on, and jump to one in a click.
+- **Apocrypha and lost books** — modules carrying the deuterocanon (Tobit, Judith, Wisdom, Sirach, Maccabees…), the Old Testament pseudepigrapha (1 Enoch, Jubilees, Jasher, the Testaments of the Twelve Patriarchs…) or the New Testament apocrypha (Thomas, Peter, Nicodemus, the Didache, Hermas…) show every book, grouped under its own heading in the book list. Import them from Zefania, OSIS, USFX or plain text in the converter; eBible translations with the Apocrypha now download with it.
 - **Strong's dictionary** — explore original Hebrew and Greek words with transliteration, pronunciation, definitions and KJV usage.
 - **Download translations in-app** — browse over 1,500 translations in more than 1,000 languages from eBible.org and the Zefania XML archive, filter by language, and install one in a click: it downloads and converts on your machine, straight into your Bible folder, with its copyright shown up front.
 - **Follow along automatically** — connect a live speech-to-text feed and the app listens for spoken Bible references — stated outright or simply the next verse in a passage being read — and stages or goes live with the matching verse on its own, tiered by confidence so only clear matches jump straight to the screen.
@@ -77,6 +78,7 @@
 - `presenter/…/dictionary/presenter/DictionaryPresenter.kt` — the dictionary card on the output
 - `profiles/…/ProfileDictionaryPage.kt`, `profiles/…/DictionaryPart.kt` — how the dictionary card looks on each output, edited on Profiles → Dictionary
 - `bible-tab/…/BibleEngineClient.kt` — auto-follow speech detection client
+- `bible/…/BibleCanon.kt` — every book number past the 66 and its section; `bible-tab/…/BibleBookSections.kt` — the book list's section headings; `bible-formats/…/OsisToSpbConverter.kt`, `PlainTextBookParser.kt`, `BibleImport.kt` — the lost-book imports
 - `bible/` (the `:bible` Gradle module) — `Bible.kt`, `BibleBook.kt`, `BibleSearch.kt`,
   `BibleVerse.kt`, `BibleTranslationNames.kt` and the `.spb` format helpers in `SpbFormat.kt`
 - `bible-formats/` (the `:bible-formats` Gradle module) — the download catalogues and the `.spb` converters behind them

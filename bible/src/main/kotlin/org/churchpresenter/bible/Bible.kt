@@ -544,7 +544,7 @@ class Bible {
         books.getOrNull(displayIndex)?.bookId?.toIntOrNull() ?: (displayIndex + 1)
 
     /**
-     * Returns the SPB book ID for the given book name (as returned by [getBookName]/[getCanonicalBooks]),
+     * Returns the SPB book ID for the given book name (as returned by [getBookName]/[getBooks]),
      * or null if not found. Used to compute a canonical code reference (see [getCodeReference]) from a
      * plain book name — e.g. when broadcasting a live verse over Instance Link, where only the name
      * crosses the wire, not this Bible's internal book ID.
@@ -656,21 +656,26 @@ class Bible {
     }
 
     companion object {
-        /** Title and testament coverage of an SPB file, read without parsing any verse data. */
-        data class TranslationSummary(val title: String?, val hasOldTestament: Boolean, val hasNewTestament: Boolean)
-
-        // Canonical book numbering used throughout the .spb format: 1-39 = Old Testament,
-        // 40-66 = New Testament (see the header book-list lines this reads).
-        private val OLD_TESTAMENT_BOOK_IDS = 1..39
-        private val NEW_TESTAMENT_BOOK_IDS = 40..66
+        /**
+         * Title and coverage of an SPB file, read without parsing any verse data.
+         *
+         * [hasExtraBooks] is true when the header lists any book past the 66 — the Apocrypha, the
+         * pseudepigrapha or anything else [BibleCanon] files outside the two testaments.
+         */
+        data class TranslationSummary(
+            val title: String?,
+            val hasOldTestament: Boolean,
+            val hasNewTestament: Boolean,
+            val hasExtraBooks: Boolean = false,
+        )
 
         /**
-         * How far in to keep looking for header content: the `##` block plus a full 66-book list,
-         * with room to spare. The stop conditions below (`-----`, a verse line) are what normally
-         * ends the scan; this is the backstop for a module that has neither, where without it a
+         * How far in to keep looking for header content: the `##` block plus a book list as long as
+         * a module carrying the whole of [BibleCanon], with room to spare. The stop conditions below
+         * (`-----`, a verse line) are what normally ends the scan; this is the backstop for a module that has neither, where without it a
          * "header scan" would read the whole multi-megabyte file.
          */
-        const val HEADER_SCAN_LINE_LIMIT = 120
+        const val HEADER_SCAN_LINE_LIMIT = 400
 
         /**
          * Far enough to pass the `##` block of any real module, and the limit the title-only callers
@@ -692,6 +697,7 @@ class Bible {
             var title: String? = null
             var hasOld = false
             var hasNew = false
+            var hasExtra = false
         }
 
         private fun openSummaryReader(resourcePath: String): java.io.BufferedReader? {
@@ -707,10 +713,11 @@ class Bible {
             // space, so the separator is trimmed, not counted.
             if (line.startsWith("##Title:")) scan.title = line.removePrefix("##Title:").trim()
             if (line.startsWith("##") || line.isEmpty()) return
-            when (SPB_BOOK_HEADER_REGEX.matchEntire(line)?.groupValues?.get(1)?.toIntOrNull()) {
-                in OLD_TESTAMENT_BOOK_IDS -> scan.hasOld = true
-                in NEW_TESTAMENT_BOOK_IDS -> scan.hasNew = true
-                else -> Unit
+            val bookId = SPB_BOOK_HEADER_REGEX.matchEntire(line)?.groupValues?.get(1)?.toIntOrNull() ?: return
+            when (BibleCanon.sectionOf(bookId)) {
+                CanonSection.OLD_TESTAMENT -> scan.hasOld = true
+                CanonSection.NEW_TESTAMENT -> scan.hasNew = true
+                else -> scan.hasExtra = true
             }
         }
 
@@ -728,7 +735,7 @@ class Bible {
                         .takeWhile { !it.startsWith("-----") && !it.startsWith("B") }
                         .forEach { line -> scanSummaryLine(line, scan) }
                 }
-                return TranslationSummary(scan.title, scan.hasOld, scan.hasNew)
+                return TranslationSummary(scan.title, scan.hasOld, scan.hasNew, scan.hasExtra)
             } catch (_: Exception) {
                 return null
             }

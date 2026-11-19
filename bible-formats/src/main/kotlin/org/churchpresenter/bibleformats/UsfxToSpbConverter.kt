@@ -1,5 +1,6 @@
 package org.churchpresenter.bibleformats
 
+import org.churchpresenter.bible.BibleCanon
 import java.io.File
 import javax.xml.parsers.DocumentBuilderFactory
 import org.w3c.dom.Element
@@ -26,17 +27,6 @@ import org.w3c.dom.Node
  * slides on the screen; leaving them out matches what the translation itself intends.
  */
 object UsfxToSpbConverter {
-
-    /** USFM book codes for the 66-book canon, in order. */
-    private val BOOK_NUMBERS: Map<String, Int> = listOf(
-        "GEN", "EXO", "LEV", "NUM", "DEU", "JOS", "JDG", "RUT", "1SA", "2SA", "1KI", "2KI",
-        "1CH", "2CH", "EZR", "NEH", "EST", "JOB", "PSA", "PRO", "ECC", "SNG", "ISA", "JER",
-        "LAM", "EZK", "DAN", "HOS", "JOL", "AMO", "OBA", "JON", "MIC", "NAM", "HAB", "ZEP",
-        "HAG", "ZEC", "MAL",
-        "MAT", "MRK", "LUK", "JHN", "ACT", "ROM", "1CO", "2CO", "GAL", "EPH", "PHP", "COL",
-        "1TH", "2TH", "1TI", "2TI", "TIT", "PHM", "HEB", "JAS", "1PE", "2PE", "1JN", "2JN",
-        "3JN", "JUD", "REV"
-    ).withIndex().associate { (index, code) -> code to index + 1 }
 
     /**
      * Elements whose contents are not scripture text.
@@ -106,7 +96,12 @@ object UsfxToSpbConverter {
         return if (code.isEmpty() || label.isNullOrEmpty()) null else code to label
     }
 
-    internal fun bookNumberFor(code: String): Int? = BOOK_NUMBERS[code.trim().uppercase()]
+    /**
+     * The `.spb` book number for a USFM book code: the 66, the deuterocanon and every other book
+     * [BibleCanon] lists. Front matter, glossaries and any code it does not list come back null and
+     * are left out of the conversion.
+     */
+    internal fun bookNumberFor(code: String): Int? = BibleCanon.byUsfm(code)?.id
 
     private fun containsVerseMarker(element: Element): Boolean =
         element.getElementsByTagName("v").length > 0
@@ -157,7 +152,7 @@ object UsfxToSpbConverter {
             bookName = bookNames[code.trim().uppercase()]
                 ?: bookNumber?.let { number ->
                     BookNames.LANGUAGE_LOOKUPS[language?.uppercase()]?.get(number)
-                        ?: BookNames.ENGLISH[number]
+                        ?: BookNames.english(number)
                 }
                 ?: code
             chapterNumber = 0
@@ -211,9 +206,3 @@ object UsfxToSpbConverter {
         }
     }
 }
-
-/** USFX is line-wrapped, so verse text arrives full of newlines that mean nothing. */
-private fun String.normalizeSpace(): String =
-    replace('\n', ' ').replace('\r', ' ').replace('\t', ' ')
-        .replace(Regex(" +"), " ")
-        .trim()

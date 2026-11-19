@@ -12,7 +12,7 @@ Two halves that were always one job, split across a module boundary until now:
 
 | Package | Owns |
 |---|---|
-| `org.churchpresenter.bibleformats` | The format converters — `XmlToSpbConverter` (Zefania XML), `UsfxToSpbConverter` (eBible USFX), `BebliaParser`, `BookNames`, `SpbVersePatcher`/`VersePatches`, `BibleCatalogNaming` |
+| `org.churchpresenter.bibleformats` | The format converters — `XmlToSpbConverter` (Zefania XML), `UsfxToSpbConverter` (eBible USFX), `OsisToSpbConverter` (OSIS), `PlainTextBookParser` (a book typed out as text), `BibleImport` (picks one of them by the file's contents), `BebliaParser`, `BookNames`, `SpbVersePatcher`/`VersePatches`, `BibleCatalogNaming` |
 | `…bibleformats.catalog` | The sources and the installer — `BibleSource` and its three implementations (`EBibleSource`, `ZefaniaSource`, `BebliaSource`), the two index caches, `BibleInstallSupport`, `BibleLanguageNames` |
 
 **Why they had to move together.** The catalogue sources import the converters, and the converters
@@ -26,6 +26,10 @@ now depends on this module for the conversions it offers from its own window.
   context; the download browser UI stays in the app.
 - **Anything `:composeApp` or `:converter` calls has to be public.** `BibleInstallSupport` was
   `internal` and is not any more — `internal` no longer reaches either consumer.
+- **Book numbers come from `:bible`'s `BibleCanon`**, for every book past the 66 as well — the
+  deuterocanon, the pseudepigrapha, the NT apocrypha. A book no table lists is numbered from
+  `OsisToSpbConverter.FIRST_UNLISTED_BOOK` (900). Beblia still keeps the 66 only: its numbering past
+  them is not known.
 - **`.spb` is the app's on-disk Bible format**, so a change to what the converters emit is a change
   to files users already have. `ZefaniaConversionTest`/`UsfxConversionTest` pin the output; treat a
   diff there as a compatibility question, not a test to update.

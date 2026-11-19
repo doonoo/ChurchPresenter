@@ -38,7 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.bibleformats.SpbVersePatcher
 import org.churchpresenter.bibleformats.malformedSpbIdCount
-import org.churchpresenter.bibleformats.XmlToSpbConverter
+import org.churchpresenter.bibleformats.BibleImport
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -75,7 +75,7 @@ fun BibleConverterTab(
       SectionCard(Strings.bibleTitle, Strings.bibleDesc) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             RaisedButton(shape = ButtonShape, onClick = {
-                val files = pickers.files(Strings.xmlBibleFiles, "xml", multiSelection = true)
+                val files = pickers.files(Strings.xmlBibleFiles, *BibleImport.EXTENSIONS.toTypedArray(), multiSelection = true)
                 if (files.isNotEmpty()) {
                     inputFiles = files; state = ConvertState.SELECT; previewItems = emptyList(); logMessages = emptyList()
                 }
@@ -134,7 +134,7 @@ fun BibleConverterTab(
                                     try {
                                         val outDir = outputDir ?: file.parentFile
                                         val outFile = File(outDir, file.nameWithoutExtension + ".spb")
-                                        XmlToSpbConverter.convert(file, outFile)
+                                        BibleImport.convert(file, outFile)
                                         "OK: ${file.name} -> ${outFile.name}"
                                     } catch (e: Exception) { "ERROR: ${file.name} - ${e.message}" }
                                 }
@@ -156,7 +156,7 @@ fun BibleConverterTab(
                                     try {
                                         val outDir = outputDir ?: file.parentFile
                                         val outFile = File(outDir, file.nameWithoutExtension + ".spb")
-                                        XmlToSpbConverter.convert(file, outFile)
+                                        BibleImport.convert(file, outFile)
                                         "OK: ${file.name} -> ${outFile.name}"
                                     } catch (e: Exception) { "ERROR: ${file.name} - ${e.message}" }
                                 }

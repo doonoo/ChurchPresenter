@@ -56,7 +56,7 @@ internal fun BibleTabScope.steppedReference(
             if (next < 1 || next > bible.getChapterCount(ref.bookIndex)) null else ref.copy(chapter = next)
         }
         else -> {
-            val bookCount = minOf(books.size, BibleViewModel.CANONICAL_BOOK_COUNT)
+            val bookCount = books.size
             val next = ref.bookIndex + delta
             if (next !in 0 until bookCount) null else ref.copy(bookIndex = next)
         }

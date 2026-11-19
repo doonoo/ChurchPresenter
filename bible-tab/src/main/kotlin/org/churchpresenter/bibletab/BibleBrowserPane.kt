@@ -418,6 +418,9 @@ private fun BookCard(
     onBookSelected: (Int) -> Unit,
 ) {
     val density = LocalDensity.current
+    val sections = LocalBookSections.current
+    val headerAt = remember(books, filteredBooks, sections) { bookSectionHeaders(books, filteredBooks, sections) }
+    val label = bookSectionLabels()
     Column(modifier = Modifier.width(with(density) { bookWidthPx.toDp() }).fillMaxHeight().bibleListCard()) {
         Box(
             Modifier.fillMaxWidth().height(BIBLE_HEADER_HEIGHT).padding(start = 16.dp, end = 10.dp),
@@ -429,6 +432,7 @@ private fun BookCard(
             items = filteredBooks,
             selectedIndex = filteredBooks.indexOf(books.getOrNull(selectedBookIndex) ?: "").coerceAtLeast(0),
             singleLine = true,
+            sectionHeaders = headerAt.mapValues { (_, section) -> label(section) },
             onItemSelected = onBookSelected
         )
     }

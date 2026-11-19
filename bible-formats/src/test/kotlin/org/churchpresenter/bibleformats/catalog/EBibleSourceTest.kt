@@ -156,6 +156,30 @@ class EBibleSourceTest {
     }
 
     @Test
+    fun `the published deuterocanon count says which translations carry the Apocrypha`() {
+        val header =
+            "languageCode,translationId,shortTitle,OTbooks,NTbooks,DCbooks,Copyright,Redistributable,downloadable,UpdateDate"
+        val body = listOf(
+            header,
+            "eng,engwebu,World English Bible,39,27,0,PD,True,True,2020-01-01",
+            "eng,eng-web,World English Bible with Deuterocanon,39,27,18,PD,True,True,2020-01-01",
+        ).joinToString("\n")
+
+        val modules = modulesOf(body).associateBy { it.identifier }
+
+        assertEquals(18, modules.getValue("eng-web").dcBookCount)
+        assertTrue(modules.getValue("eng-web").hasApocrypha)
+        assertFalse(modules.getValue("engwebu").hasApocrypha)
+    }
+
+    @Test
+    fun `a catalogue with no deuterocanon column reports none`() {
+        val modules = modulesOf(csv("eng,kjv,KJV,King James,PD,True,True,2020-01-01"))
+
+        assertFalse(modules.single().hasApocrypha)
+    }
+
+    @Test
     fun `a catalogue with no book counts falls back to reading the name`() {
         val modules = modulesOf(csv("eng,kjvNT,KJV NT,King James NT,PD,True,True,2020-01-01"))
 
