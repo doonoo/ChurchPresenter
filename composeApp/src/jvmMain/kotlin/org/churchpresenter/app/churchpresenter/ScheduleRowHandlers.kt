@@ -1,11 +1,11 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import org.churchpresenter.songs.ScheduleSongAction
 import org.churchpresenter.sharedui.models.Presenting
 import org.churchpresenter.sharedui.models.Tabs
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.liveoutput.PresenterManager
-import org.churchpresenter.liveoutput.cueOrSetAnnouncementText
 import org.churchpresenter.settings.AppSettings
 
 /**
@@ -22,6 +22,8 @@ internal class ScheduleRowHandlers(
     private val presenterManager: PresenterManager,
     private val onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     private val lowerThirdFolder: () -> String,
+    /** What the imported lexicons say of a Strong's entry, laid beside it on the card. */
+    private val lexiconsFor: (StrongsEntry) -> List<StrongsEntry> = { emptyList() },
 ) {
     /** Puts a schedule verse on screen by handing it to the Bible tab to go live with. */
     fun presentBible(item: ScheduleItem.BibleVerseItem) {
@@ -71,9 +73,14 @@ internal class ScheduleRowHandlers(
         presenting(Presenting.WEBSITE)
     }
 
+    /**
+     * Puts a dictionary row on the dictionary card, as the Dictionary tab's Go Live does: styled by
+     * the profile's Dictionary page, named by its dictionary, with the lexicons beside a Strong's entry.
+     */
     fun presentDictionary(item: ScheduleItem.DictionaryItem) {
-        cueOrSetAnnouncementText(presenterManager, "${item.word} (${item.transliteration})\n\n${item.definition}")
+        val entry = item.entry
+        presenterManager.setDisplayedDictionaryEntry(entry.copy(companions = lexiconsFor(entry)))
         presenterManager.setShowPresenterWindow(true)
-        presenting(Presenting.ANNOUNCEMENTS)
+        presenting(Presenting.DICTIONARY)
     }
 }

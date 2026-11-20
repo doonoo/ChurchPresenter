@@ -1,6 +1,5 @@
 package org.churchpresenter.app.churchpresenter.remote
 
-import org.churchpresenter.core.models.dictionary.StrongsEntry
 import org.churchpresenter.app.churchpresenter.ScheduleActions
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.core.models.bible.SelectedVerse
@@ -56,15 +55,7 @@ internal fun executeProjectItem(
         is ScheduleItem.CueItem -> Unit
 
         is ScheduleItem.DictionaryItem -> {
-            presenterManager.setDisplayedDictionaryEntry(
-                StrongsEntry(
-                    number = item.number,
-                    word = item.word,
-                    transliteration = item.transliteration,
-                    pronunciation = "",
-                    definition = item.definition
-                )
-            )
+            presenterManager.setDisplayedDictionaryEntry(item.entry)
             presenterManager.setPresentingMode(Presenting.DICTIONARY)
             presenterManager.setShowPresenterWindow(true)
         }

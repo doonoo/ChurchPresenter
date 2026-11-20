@@ -1,5 +1,6 @@
 package org.churchpresenter.schedule
 
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import java.io.File
 import java.nio.file.Files
@@ -93,7 +94,7 @@ class ScheduleViewModelFollowingTest {
         vm.addAnnouncement("Welcome")
         vm.addWebsite("https://example.org", "Site")
         vm.addScene("s1", "Scene")
-        vm.addDictionary("G26", "agathos", "agathos", "good")
+        vm.addDictionary(StrongsEntry("G26", "agathos", "agathos", "", "good"))
 
         assertEquals(11, pushed.size, "every add* method must funnel through the same push path")
         assertTrue(vm.scheduleItems.isEmpty(), "a follower must never mutate its own schedule locally")

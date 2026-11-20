@@ -29,6 +29,7 @@ internal fun MainDesktopScope.scheduleRowHandlers() = ScheduleRowHandlers(
     presenterManager = presenterManager,
     onSettingsChange = onSettingsChange,
     lowerThirdFolder = { appSettings.streamingSettings.lowerThirdFolder },
+    lexiconsFor = dictionaryViewModel::lexiconEntriesFor,
 )
 
 @Composable
@@ -149,7 +150,7 @@ internal fun MainDesktopScope.openScheduleItem(item: ScheduleItem) {
             sceneViewModel.selectScene(item.sceneId)
         }
         is ScheduleItem.DictionaryItem -> {
-            dictionaryViewModel.selectByNumber(item.number)
+            dictionaryViewModel.openEntry(item.number)
         }
         // Planned time that never goes on screen; nothing to open.
         else -> Unit

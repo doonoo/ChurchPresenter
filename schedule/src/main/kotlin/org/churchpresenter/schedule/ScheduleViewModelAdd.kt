@@ -1,5 +1,7 @@
 package org.churchpresenter.schedule
 
+import org.churchpresenter.core.models.dictionary.StrongsEntry
+import org.churchpresenter.core.models.schedule.dictionaryItemFor
 import java.io.File
 import java.util.UUID
 import org.churchpresenter.core.models.schedule.ScheduleItem
@@ -185,14 +187,7 @@ fun ScheduleViewModel.addAnnouncement(
     )
 }
 
-fun ScheduleViewModel.addDictionary(number: String, word: String, transliteration: String, definition: String) {
-    addOrPush(
-        ScheduleItem.DictionaryItem(
-            id = UUID.randomUUID().toString(),
-            number = number,
-            word = word,
-            transliteration = transliteration,
-            definition = definition
-        )
-    )
+/** A dictionary or lexicon entry as a row, with its dictionary's name, pronunciation and usage. */
+fun ScheduleViewModel.addDictionary(entry: StrongsEntry) {
+    addOrPush(dictionaryItemFor(UUID.randomUUID().toString(), entry))
 }

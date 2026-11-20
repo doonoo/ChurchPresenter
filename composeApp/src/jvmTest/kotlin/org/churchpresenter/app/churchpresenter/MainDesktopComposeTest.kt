@@ -2,6 +2,7 @@
 
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import org.churchpresenter.app.churchpresenter.remote.RemoteSongSelection
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
@@ -247,7 +248,7 @@ class MainDesktopComposeTest : MainDesktopComposeHarness() {
         actions.addPresentation(File(dir, "deck.pptx").absolutePath, "deck", 0, "pptx")
         actions.addMedia("http://example.invalid/clip.mp4", "Clip", "video", "")
         actions.addScene("scene-1", "A Scene")
-        actions.addDictionary("H1", "word", "translit", "definition")
+        actions.addDictionary(StrongsEntry("H1", "word", "translit", "", "definition"))
         actions.addWebsite("http://example.invalid", "A Site")
         waitForIdle()
     }
@@ -257,7 +258,7 @@ class MainDesktopComposeTest : MainDesktopComposeHarness() {
         actions.addSong(1, "A Test Song", "Hymnal", "Hymnal::1")
         actions.addBibleVerse("John", 3, 16, "verse text", "", 43)
         actions.addWebsite("http://example.invalid", "A Site")
-        actions.addDictionary("H1", "word", "translit", "definition")
+        actions.addDictionary(StrongsEntry("H1", "word", "translit", "", "definition"))
         waitForIdle()
 
         // Clicking each one runs the root's when-over-item-type, which routes to a tab and stores
@@ -735,7 +736,7 @@ class MainDesktopComposeTest : MainDesktopComposeHarness() {
             actions.addPresentation(File(dir, "deck.pptx").absolutePath, "deck", 0, "pptx")
             actions.addMedia("http://example.invalid/clip.mp4", "Clip", "video", "")
             actions.addWebsite("http://example.invalid", "A Site")
-            actions.addDictionary("H1", "word", "translit", "definition")
+            actions.addDictionary(StrongsEntry("H1", "word", "translit", "", "definition"))
             actions.addScene("scene-1", "A Scene")
             waitForIdle()
 

@@ -48,8 +48,11 @@ import org.churchpresenter.sharedui.screenshot.PinnedFonts
 
 /** What the tab reported back, so a test asserts on the choice rather than on a stub. */
 class DictionaryReports {
-    /** number, word, transliteration, definition — exactly what the schedule would be given. */
+    /** number, word, transliteration, definition of each entry sent to the schedule. */
     val scheduled = mutableListOf<List<String>>()
+
+    /** Each entry sent to the schedule, whole. */
+    val scheduledEntries = mutableListOf<StrongsEntry>()
     val live = mutableListOf<StrongsEntry>()
     val wordClicks = mutableListOf<String>()
     val verseClicks = mutableListOf<Triple<Int, Int, Int>>()
@@ -153,8 +156,9 @@ fun dictionaryTab(
                                 val before = reports.settings.lastOrNull() ?: appSettings ?: AppSettings()
                                 reports.settings += change(before)
                             },
-                            onAddToSchedule = if (withOnAddToSchedule) { { number, word, transliteration, definition ->
-                                reports.scheduled += listOf(number, word, transliteration, definition)
+                            onAddToSchedule = if (withOnAddToSchedule) { { e ->
+                                reports.scheduled += listOf(e.number, e.word, e.transliteration, e.definition)
+                                reports.scheduledEntries += e
                             } } else null,
                             onGoLive = if (withOnGoLive) { { reports.live += it } } else null,
                             liveEntryNumber = liveEntryNumber,

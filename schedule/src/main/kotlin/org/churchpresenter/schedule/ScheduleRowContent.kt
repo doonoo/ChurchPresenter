@@ -261,7 +261,8 @@ internal fun ScheduleRowDetailLine(item: ScheduleItem, density: ScheduleDensity)
             overflow = TextOverflow.Ellipsis,
         )
         is ScheduleItem.DictionaryItem -> Text(
-            text = item.transliteration,
+            // An imported dictionary's entry has no transliteration: the start of its definition shows.
+            text = item.transliteration.ifBlank { item.definition },
             style = MaterialTheme.typography.bodySmall,
             color = detailColor,
             maxLines = 1,

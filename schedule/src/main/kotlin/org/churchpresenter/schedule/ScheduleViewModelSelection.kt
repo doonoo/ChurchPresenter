@@ -55,7 +55,7 @@ fun ScheduleViewModel.presentItem(
         is ScheduleItem.WebsiteItem -> onPresentWebsite?.invoke(item) ?: onPresenting(Presenting.WEBSITE)
         is ScheduleItem.SceneItem -> onPresentScene?.invoke(item) ?: onPresenting(Presenting.CANVAS)
         is ScheduleItem.DictionaryItem ->
-            onPresentDictionary?.invoke(item) ?: onPresenting(Presenting.ANNOUNCEMENTS)
+            onPresentDictionary?.invoke(item) ?: onPresenting(Presenting.DICTIONARY)
         is ScheduleItem.CueItem -> onPresentCue?.invoke(item)
         is ScheduleItem.MinistryItem -> { /* happens up front, never on screen */ }
     }

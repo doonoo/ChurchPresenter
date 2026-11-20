@@ -2,6 +2,7 @@
 
 package org.churchpresenter.schedule.screenshot
 
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Canvas
@@ -275,10 +276,8 @@ class ScheduleTabScreenshotTest {
         seed = {
             addScene(sceneId = "scene-1", sceneName = "Countdown scene")
             addDictionary(
-                number = "H2617",
-                word = "חֶסֶד",
-                transliteration = "chesed",
-                definition = "steadfast love",
+                StrongsEntry(number = "H2617", word = "חֶסֶד", transliteration = "chesed", pronunciation = "",
+                    definition = "steadfast love"),
             )
         },
     )
