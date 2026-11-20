@@ -30,7 +30,8 @@ class DictionaryItemTest {
 
     @Test
     fun `a row's lexicons are not saved with it`() {
-        val entry = StrongsEntry("G26", "ἀγάπη", "", "", "love", companions = listOf(StrongsEntry("G26", "", "", "", "x")))
+        val lexicon = StrongsEntry("G26", "", "", "", "x")
+        val entry = StrongsEntry("G26", "ἀγάπη", "", "", "love", companions = listOf(lexicon))
 
         assertEquals(emptyList(), dictionaryItemFor("r", entry).entry.companions)
     }

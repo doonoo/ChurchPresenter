@@ -44,17 +44,7 @@ fun RemoteItemDto.toScheduleItem(): ScheduleItem? {
                 mediaType  = mediaType ?: "local"
             )
         // Dictionary — must have strongsNumber (a Strong's number, or an imported entry's key)
-        strongsNumber != null ->
-            ScheduleItem.DictionaryItem(
-                id              = safeId,
-                number          = strongsNumber,
-                word            = title ?: "",
-                transliteration = transliteration ?: "",
-                definition      = definition ?: "",
-                pronunciation   = pronunciation ?: "",
-                kjvUsage        = kjvUsage ?: "",
-                source          = dictionarySource ?: "",
-            )
+        strongsNumber != null -> dictionaryItem(safeId, strongsNumber)
         // Announcement / timer — must have announcementText (may be "")
         announcementText != null -> toAnnouncementItem(safeId, announcementText)
         // Website — must have url
@@ -162,6 +152,18 @@ internal fun ScheduleItem.toDto(): ScheduleItemDto = when (this) {
         id = id, type = "ministry", displayText = displayText, text = detail
     )
 }
+
+/** The dictionary branch of [toScheduleItem], apart so its optional fields' defaults are read in one place. */
+private fun RemoteItemDto.dictionaryItem(id: String, number: String) = ScheduleItem.DictionaryItem(
+    id              = id,
+    number          = number,
+    word            = title ?: "",
+    transliteration = transliteration ?: "",
+    definition      = definition ?: "",
+    pronunciation   = pronunciation ?: "",
+    kjvUsage        = kjvUsage ?: "",
+    source          = dictionarySource ?: "",
+)
 
 /** The verse branch of [toScheduleItem], apart so its optional fields' defaults are read in one place. */
 private fun RemoteItemDto.bibleVerseItem(id: String, bookName: String, chapter: Int, verseNumber: Int) =
