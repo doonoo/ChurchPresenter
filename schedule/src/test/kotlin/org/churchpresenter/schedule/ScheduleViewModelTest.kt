@@ -626,7 +626,7 @@ class ScheduleViewModelTest {
             listOf(
                 Presenting.LYRICS, Presenting.BIBLE, Presenting.PICTURES, Presenting.PRESENTATION,
                 Presenting.MEDIA, Presenting.ANNOUNCEMENTS, Presenting.WEBSITE, Presenting.CANVAS,
-                Presenting.ANNOUNCEMENTS,
+                Presenting.DICTIONARY,
             ),
             modes,
             "a lower third and a cue have nothing to fall back to",

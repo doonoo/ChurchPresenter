@@ -74,7 +74,8 @@ internal class DictionarySources(
                     state.entries = loaded
                     state.pendingSelectionNumber?.let { number ->
                         state.pendingSelectionNumber = null
-                        loaded.firstOrNull { it.number == number }?.let { selection.onEntrySelected(it, addToHistory = false) }
+                        loaded.firstOrNull { it.number == number }
+                            ?.let { selection.onEntrySelected(it, addToHistory = false) }
                     }
                 }
             } finally {

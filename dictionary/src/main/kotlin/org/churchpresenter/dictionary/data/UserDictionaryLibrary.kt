@@ -90,6 +90,7 @@ class UserDictionaryLibrary(private val dir: File) {
 
     companion object {
         private const val INDEX_FILE = "index.json"
+
         /** What every imported dictionary's id, and so every topical entry's key, begins with. */
         const val ID_PREFIX = "dict-"
         private const val MAX_SLUG_LENGTH = 40
