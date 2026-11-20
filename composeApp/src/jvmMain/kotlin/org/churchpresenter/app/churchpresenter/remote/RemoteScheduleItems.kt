@@ -239,12 +239,7 @@ internal fun addScheduleItem(
             item.subtitleUrl
         )
 
-        is ScheduleItem.DictionaryItem -> scheduleActions.addDictionary(
-            item.number,
-            item.word,
-            item.transliteration,
-            item.definition
-        )
+        is ScheduleItem.DictionaryItem -> scheduleActions.addDictionary(item.entry)
 
         is ScheduleItem.AnnouncementItem -> scheduleActions.addAnnouncement(item)
 

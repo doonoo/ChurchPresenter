@@ -338,9 +338,7 @@ internal fun MainDesktopScope.DictionaryTabPane() {
         viewModel = dictionaryViewModel,
         appSettings = appSettings,
         onSettingsChange = onSettingsChange,
-        onAddToSchedule = { number, word, transliteration, definition ->
-            state.scheduleActions.addDictionary(number, word, transliteration, definition)
-        },
+        onAddToSchedule = { entry -> state.scheduleActions.addDictionary(entry) },
         liveEntryNumber = presenterManager.displayedDictionaryEntry.value?.number
             ?.takeIf { presenterManager.isLive(Presenting.DICTIONARY) },
         onGoLive = { entry ->

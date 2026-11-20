@@ -108,6 +108,28 @@ class DictionaryViewModel private constructor(
      */
     val isStrongsKeyed: Boolean get() = state.activeSourceId == null || activeDictionary?.isLexicon == true
 
+    /**
+     * Opens the entry filed under [number] in its own dictionary -- an imported one for a key such as
+     * `dict-eastons:Aaron`, Strong's for anything else, a lexicon's Strong's-numbered entry included
+     * (Strong's shows what each lexicon says of it). A schedule row uses this to show its entry.
+     * Nothing changes when the dictionary has since been removed.
+     */
+    fun openEntry(number: String) {
+        val sourceId = UserDictionaryLibrary.dictionaryIdOf(number)
+        if (sourceId != null && state.userDictionaries.none { it.id == sourceId }) return
+        if (sourceId != state.activeSourceId) {
+            selectSource(sourceId)
+            state.pendingSelectionNumber = if (sourceId == null) number.uppercase() else number
+            return
+        }
+        if (sourceId == null) {
+            selectByNumber(number)
+        } else {
+            state.entries.firstOrNull { it.number == number }?.let { onEntrySelected(it, scrollToEntry = true) }
+                ?: run { state.pendingSelectionNumber = number }
+        }
+    }
+
     /** What each imported lexicon says of [entry], when it is a Strong's entry; empty otherwise. */
     fun lexiconEntriesFor(entry: StrongsEntry): List<StrongsEntry> =
         if (entry.source.isBlank() && entry.isStrongsNumber) state.lexiconIndex[entry.number].orEmpty() else emptyList()

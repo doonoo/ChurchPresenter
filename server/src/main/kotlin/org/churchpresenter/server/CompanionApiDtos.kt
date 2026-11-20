@@ -584,10 +584,15 @@ data class RemoteItemDto(
     val mediaUrl: String? = null,
     val mediaTitle: String? = null,
     val mediaType: String? = null,
-    // dictionary (Strong's) — strongsNumber is the discriminator; word carried in `title`
+    // dictionary — strongsNumber is the discriminator (a Strong's number, or an imported entry's
+    // `key`); word carried in `title`
     val strongsNumber: String? = null,
     val transliteration: String? = null,
     val definition: String? = null,
+    /** An imported dictionary's name (an entry's `source`), shown on the output in place of its key. */
+    val dictionarySource: String? = null,
+    val pronunciation: String? = null,
+    val kjvUsage: String? = null,
     // announcement / timer — announcementText is the discriminator ("" for a pure timer)
     val announcementText: String? = null,
     val textColor: String? = null,

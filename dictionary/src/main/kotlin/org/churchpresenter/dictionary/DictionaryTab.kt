@@ -35,7 +35,8 @@ fun DictionaryTab(
     viewModel: DictionaryViewModel,
     appSettings: AppSettings? = null,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
-    onAddToSchedule: ((number: String, word: String, transliteration: String, definition: String) -> Unit)? = null,
+    /** Adds the entry shown to the schedule, its dictionary's name with it. */
+    onAddToSchedule: ((StrongsEntry) -> Unit)? = null,
     onGoLive: ((StrongsEntry) -> Unit)? = null,
     /** The number of the entry on air, or null when the dictionary is not; Go Live skips it. */
     liveEntryNumber: String? = null,
@@ -130,9 +131,7 @@ fun DictionaryTab(
             onWordClick = onWordClick,
             onVerseClick = onVerseClick,
             getEntry = { number -> entryIndex[number] },
-            onAddToSchedule = onAddToSchedule?.let { cb ->
-                { e -> cb(e.number, e.word, e.transliteration, e.definition) }
-            },
+            onAddToSchedule = onAddToSchedule,
             onGoLive = goLive,
             showsLanguageToggle = viewModel.activeSourceId == null,
             lexiconEntries = viewModel.selectedEntry?.let(viewModel::lexiconEntriesFor).orEmpty(),

@@ -35,6 +35,7 @@ internal fun Route.bibleAndDictionaryRoutes(
 ) {
     bibleReadRoutes(server, _bible, _bibleCatalog)
     dictionaryRoutes(server, _bible, json)
+    userDictionaryRoutes(server, json)
     bibleSelectRoutes(server, json, scope)
 }
 

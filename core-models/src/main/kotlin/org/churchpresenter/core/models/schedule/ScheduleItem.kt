@@ -1,5 +1,6 @@
 package org.churchpresenter.core.models.schedule
 
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.churchpresenter.core.models.text.TextBackdrop
@@ -193,8 +194,16 @@ sealed class ScheduleItem {
         val word: String,
         val transliteration: String,
         val definition: String,
-        override val displayText: String = "$word ($number)"
-    ) : ScheduleItem()
+        val pronunciation: String = "",
+        val kjvUsage: String = "",
+        /** The imported dictionary's name, blank for Strong's -- see [StrongsEntry.source]. */
+        val source: String = "",
+        override val displayText: String = dictionaryRowLabel(word, number, source),
+    ) : ScheduleItem() {
+        /** The entry this row puts on screen, as the Dictionary tab's Go Live would. */
+        val entry: StrongsEntry
+            get() = StrongsEntry(number, word, transliteration, pronunciation, definition, kjvUsage, source)
+    }
 
     /**
      * Something in the order of service that does not go on screen -- a poem read, a violin
@@ -303,3 +312,24 @@ const val LOOP_FOREVER: Int = 0
  */
 fun websiteDisplayText(title: String): String =
     "${title.take(TITLE_PREVIEW_CHARS)}${if (title.length > TITLE_PREVIEW_CHARS) "…" else ""}"
+
+/**
+ * A dictionary row's label: the word and what names it -- its Strong's number, or for an imported
+ * dictionary's entry that dictionary's name, never the key it is filed under.
+ */
+fun dictionaryRowLabel(word: String, number: String, source: String): String {
+    val reference = StrongsEntry(number, word, "", "", "", source = source).shownReference
+    return if (word.isBlank()) reference else "$word ($reference)"
+}
+
+/** The schedule row for [entry]: everything the output card shows of it but its lexicons. */
+fun dictionaryItemFor(id: String, entry: StrongsEntry): ScheduleItem.DictionaryItem = ScheduleItem.DictionaryItem(
+    id = id,
+    number = entry.number,
+    word = entry.word,
+    transliteration = entry.transliteration,
+    definition = entry.definition,
+    pronunciation = entry.pronunciation,
+    kjvUsage = entry.kjvUsage,
+    source = entry.source,
+)

@@ -2,6 +2,7 @@
 
 package org.churchpresenter.schedule
 
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import androidx.compose.runtime.CompositionLocalProvider
 import org.churchpresenter.core.models.songs.SongItem
 import androidx.compose.foundation.layout.Box
@@ -306,10 +307,8 @@ fun ScheduleViewModel.seedEveryItemType() {
     addWebsite(url = "https://churchpresenter.org/notices", title = "Notices")
     addScene(sceneId = "scene-1", sceneName = "Countdown scene")
     addDictionary(
-        number = "H2617",
-        word = "חֶסֶד",
-        transliteration = "chesed",
-        definition = "steadfast love",
+        StrongsEntry(number = "H2617", word = "חֶסֶד", transliteration = "chesed", pronunciation = "",
+            definition = "steadfast love"),
     )
     // A ministry item only ever reaches the Schedule from a phone; the row shows what it
     // is and who, and cannot be presented.

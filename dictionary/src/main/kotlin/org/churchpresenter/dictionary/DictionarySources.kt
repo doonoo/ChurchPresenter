@@ -70,7 +70,14 @@ internal class DictionarySources(
         return scope.launch {
             try {
                 val loaded = withContext(io) { library.load(id) }
-                if (state.activeSourceId == id) state.entries = loaded
+                if (state.activeSourceId == id) {
+                    state.entries = loaded
+                    state.pendingSelectionNumber?.let { number ->
+                        state.pendingSelectionNumber = null
+                        loaded.firstOrNull { it.number == number }
+                            ?.let { selection.onEntrySelected(it, addToHistory = false) }
+                    }
+                }
             } finally {
                 state.isLoading = false
             }

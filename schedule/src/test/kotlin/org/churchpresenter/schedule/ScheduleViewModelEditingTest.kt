@@ -323,7 +323,7 @@ class ScheduleViewModelEditingTest {
             "announcement" to Presenting.ANNOUNCEMENTS,
             "website" to Presenting.WEBSITE,
             "scene" to Presenting.CANVAS,
-            "dict" to Presenting.ANNOUNCEMENTS
+            "dict" to Presenting.DICTIONARY
         )
         allItemTypes().filter { it.id in expected }.forEach { item ->
             assertEquals(listOf(expected.getValue(item.id)), vm.presentBare(item), "wrong tab for ${item.id}")

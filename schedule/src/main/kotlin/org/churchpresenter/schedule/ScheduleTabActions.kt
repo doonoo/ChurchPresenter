@@ -1,5 +1,6 @@
 package org.churchpresenter.schedule
 
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import org.churchpresenter.showcontrol.Action
 import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
@@ -48,8 +49,7 @@ data class ScheduleTabActions(
     val addWebsite: (url: String, title: String) -> Unit = { _, _ -> },
     val updateWebsiteTitle: (url: String, title: String) -> Unit = { _, _ -> },
     val addScene: (sceneId: String, sceneName: String) -> Unit = { _, _ -> },
-    val addDictionary: (number: String, word: String, transliteration: String, definition: String) -> Unit =
-        { _, _, _, _ -> },
+    val addDictionary: (entry: StrongsEntry) -> Unit = { },
     val addCue: (item: ScheduleItem.CueItem) -> Unit = { },
     val addRow: (item: ScheduleItem, timing: RowTiming?) -> Unit = { _, _ -> },
     /** Runs the block with every row it adds landing at index and on, rather than at the end. */
@@ -120,8 +120,8 @@ internal fun ScheduleViewModel.tabActions(files: ScheduleFileCommands) = Schedul
     addWebsite       = { url, title -> addWebsite(url, title) },
     updateWebsiteTitle = { url, title -> updateWebsiteTitle(url, title) },
     addScene         = { sceneId, sceneName -> addScene(sceneId, sceneName) },
-    addDictionary    = { number, word, transliteration, definition ->
-        addDictionary(number, word, transliteration, definition)
+    addDictionary    = { entry ->
+        addDictionary(entry)
     },
     addCue           = { item -> addCue(item) },
     addRow           = { item, timing -> addRow(item, timing) },

@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import org.churchpresenter.core.models.schedule.RowTiming
 import org.churchpresenter.core.models.schedule.ScheduleItem
 import org.churchpresenter.schedule.ScheduleTabActions
@@ -38,7 +39,7 @@ class ScheduleActionsTest {
         actions.addPresentation("path", "name", 1, "pptx")
         actions.addMedia("url", "title", "video", "")
         actions.addScene("id", "name")
-        actions.addDictionary("1", "word", "translit", "def")
+        actions.addDictionary(StrongsEntry("1", "word", "translit", "", "def"))
         actions.addAnnouncement(ScheduleItem.AnnouncementItem(id = "1", text = "text"))
         actions.addWebsite("url", "title")
     }
@@ -178,15 +179,14 @@ class ScheduleActionsTest {
     }
 
     @Test
-    fun `addDictionary passes number, word, transliteration and definition in order`() {
-        var received: List<Any>? = null
-        val actions = ScheduleActions(
-            addDictionary = { number, word, translit, def -> received = listOf(number, word, translit, def) },
-        )
+    fun `addDictionary passes the whole entry, its dictionary's name with it`() {
+        var received: StrongsEntry? = null
+        val actions = ScheduleActions(addDictionary = { received = it })
+        val entry = StrongsEntry("H430", "Elohim", "el-o-heem", "", "God", source = "BDB")
 
-        actions.addDictionary("H430", "Elohim", "el-o-heem", "God")
+        actions.addDictionary(entry)
 
-        assertEquals(listOf("H430", "Elohim", "el-o-heem", "God"), received)
+        assertEquals(entry, received)
     }
 
     @Test

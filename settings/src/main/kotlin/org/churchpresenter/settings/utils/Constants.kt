@@ -331,6 +331,9 @@ object Constants {
     const val ENDPOINT_DICTIONARY        = "/api/dictionary"
     const val ENDPOINT_DICTIONARY_ENTRY  = "/api/dictionary/{number}"
     const val ENDPOINT_DICTIONARY_VERSES = "/api/dictionary/{number}/verses"
+    const val ENDPOINT_DICTIONARY_LEXICONS = "/api/dictionary/{number}/lexicons"
+    const val ENDPOINT_USER_DICTIONARIES = "/api/dictionaries"
+    const val ENDPOINT_USER_DICTIONARY = "/api/dictionaries/{id}"
 
     // Background asset slot names — shared vocabulary between CompanionServer's
     // GET /api/backgrounds/asset/{slot} and InstanceLinkClient's fetchBackgroundAsset(), since a

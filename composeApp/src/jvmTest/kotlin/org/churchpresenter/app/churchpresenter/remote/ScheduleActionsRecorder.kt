@@ -35,8 +35,8 @@ internal class ScheduleActionsRecorder {
         addPresentation = { path, name, slides, type -> added += "presentation:$path:$name:$slides:$type" },
         addMedia = { url, title, type, _ -> added += "media:$url:$title:$type" },
         addScene = { id, name -> added += "scene:$id:$name" },
-        addDictionary = { number, word, translit, definition ->
-            added += "dictionary:$number:$word:$translit:$definition"
+        addDictionary = { e ->
+            added += "dictionary:${e.number}:${e.word}:${e.transliteration}:${e.definition}"
         },
         addAnnouncement = { item ->
             added += "announcement:${item.id}"

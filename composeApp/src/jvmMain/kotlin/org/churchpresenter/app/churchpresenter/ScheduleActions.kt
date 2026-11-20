@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import java.io.File
 import org.churchpresenter.showcontrol.Action
 import org.churchpresenter.core.models.schedule.RowTiming
@@ -31,8 +32,7 @@ data class ScheduleActions(
     val addMedia: (mediaUrl: String, mediaTitle: String, mediaType: String, subtitleUrl: String) -> Unit =
         { _, _, _, _ -> },
     val addScene: (sceneId: String, sceneName: String) -> Unit = { _, _ -> },
-    val addDictionary: (number: String, word: String, transliteration: String, definition: String) -> Unit =
-        { _, _, _, _ -> },
+    val addDictionary: (entry: StrongsEntry) -> Unit = { },
     val addAnnouncement: (item: ScheduleItem.AnnouncementItem) -> Unit = { },
     val addWebsite: (url: String, title: String) -> Unit = { _, _ -> },
     /** A cue row, as loaded from the Calendar Manager -- kept whole, its payload and time with it. */

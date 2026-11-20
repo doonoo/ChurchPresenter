@@ -90,8 +90,14 @@ class UserDictionaryLibrary(private val dir: File) {
 
     companion object {
         private const val INDEX_FILE = "index.json"
-        private const val ID_PREFIX = "dict-"
+
+        /** What every imported dictionary's id, and so every topical entry's key, begins with. */
+        const val ID_PREFIX = "dict-"
         private const val MAX_SLUG_LENGTH = 40
+
+        /** The imported dictionary an entry key such as `dict-eastons:Aaron` is filed under; null for any other key. */
+        fun dictionaryIdOf(number: String): String? =
+            number.substringBefore(':', "").takeIf { it.startsWith(ID_PREFIX) }
 
         /** The library in the app data folder. Resolving that folder touches the disk. */
         fun inAppData(): UserDictionaryLibrary = UserDictionaryLibrary(File(AppDataDir.resolve(), "dictionaries"))

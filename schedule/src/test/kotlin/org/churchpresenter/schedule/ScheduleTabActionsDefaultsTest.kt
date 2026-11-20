@@ -1,5 +1,6 @@
 package org.churchpresenter.schedule
 
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertTrue
@@ -53,7 +54,7 @@ class ScheduleTabActionsDefaultsTest {
         actions.addWebsite("url", "title")
         actions.updateWebsiteTitle("url", "title")
         actions.addScene("sceneId", "sceneName")
-        actions.addDictionary("number", "word", "transliteration", "definition")
+        actions.addDictionary(StrongsEntry("number", "word", "transliteration", "", "definition"))
         actions.addCue(ScheduleItem.CueItem("cue", CueAction.BLANK))
         actions.addRow(ScheduleItem.LabelItem("row", "Welcome", "#FFFFFF", "#000000"), null)
         actions.selectItem("id")

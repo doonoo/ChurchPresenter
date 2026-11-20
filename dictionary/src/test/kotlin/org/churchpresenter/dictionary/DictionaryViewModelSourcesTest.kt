@@ -192,6 +192,58 @@ class DictionaryViewModelSourcesTest {
         assertEquals(listOf("Easton's"), d.userDictionaries.map { it.name })
     }
 
+    @Test
+    fun `openEntry switches to an imported entry's dictionary and selects it once read`() {
+        val d = vm()
+        runBlocking { d.importDictionary(source("eastons.json", eastons)).join() }
+        val id = d.activeSourceId!!
+        d.selectSource(null)
+        loadNow(d)
+
+        d.openEntry("$id:Abba")
+        loadNow(d)
+
+        assertEquals(id, d.activeSourceId)
+        assertEquals("Abba", d.selectedEntry?.word)
+    }
+
+    @Test
+    fun `openEntry within the dictionary being read selects the entry at once`() {
+        val d = vm()
+        runBlocking { d.importDictionary(source("eastons.json", eastons)).join() }
+        loadNow(d)
+        val id = d.activeSourceId!!
+
+        d.openEntry("$id:Aaron")
+
+        assertEquals("Aaron", d.selectedEntry?.word)
+    }
+
+    @Test
+    fun `openEntry for a Strong's number goes back to Strong's from an imported dictionary`() {
+        val d = vm()
+        runBlocking { d.importDictionary(source("eastons.json", eastons)).join() }
+        loadNow(d)
+
+        d.openEntry("g26")
+        loadNow(d)
+
+        assertNull(d.activeSourceId)
+        assertEquals("G26", d.selectedEntry?.number)
+    }
+
+    @Test
+    fun `openEntry for a removed dictionary changes nothing`() {
+        val d = vm()
+        loadNow(d)
+        awaitUntil("the library to be listed") { !d.isImporting }
+
+        d.openEntry("dict-gone:Aaron")
+
+        assertNull(d.activeSourceId)
+        assertNull(d.selectedEntry)
+    }
+
     private companion object {
         const val TIMEOUT_MS = 5_000L
     }

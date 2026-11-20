@@ -2,6 +2,7 @@
 
 package org.churchpresenter.schedule
 
+import org.churchpresenter.core.models.dictionary.StrongsEntry
 import org.churchpresenter.core.models.songs.SongItem
 import io.mockk.every
 import io.mockk.mockkObject
@@ -206,7 +207,7 @@ class ScheduleTabMenuActionsTest {
             actions.addLowerThird("preset-1", "Speaker name", true, 1_500L)
             actions.addWebsite("https://example.org", "Notices")
             actions.addScene("scene-1", "Opening scene")
-            actions.addDictionary("G5485", "χάρις", "charis", "grace")
+            actions.addDictionary(StrongsEntry("G5485", "χάρις", "charis", "", "grace"))
             waitForIdle()
 
             assertEquals(
