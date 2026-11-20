@@ -1,5 +1,6 @@
 package org.churchpresenter.server
 
+import org.churchpresenter.dictionary.data.UserDictionaryLibrary
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
@@ -103,7 +104,14 @@ class CompanionServer(
      * wait for what a click asked for.
      */
     lifecycleDispatcher: CoroutineDispatcher = Dispatchers.IO.limitedParallelism(1),
+    /**
+     * Where the Dictionary tab keeps imported dictionaries, served to phones by `/api/dictionaries`.
+     * Made on first use; a test passes a library in a folder of its own.
+     */
+    dictionaryLibrary: () -> UserDictionaryLibrary = UserDictionaryLibrary::inAppData,
 ) {
+    internal val userDictionaries = UserDictionaryRepository(dictionaryLibrary)
+
     internal val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     /**

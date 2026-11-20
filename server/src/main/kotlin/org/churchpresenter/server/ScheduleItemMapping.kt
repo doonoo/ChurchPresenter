@@ -43,14 +43,17 @@ fun RemoteItemDto.toScheduleItem(): ScheduleItem? {
                 mediaTitle = mediaTitle ?: mediaUrl,
                 mediaType  = mediaType ?: "local"
             )
-        // Dictionary (Strong's) — must have strongsNumber
+        // Dictionary — must have strongsNumber (a Strong's number, or an imported entry's key)
         strongsNumber != null ->
             ScheduleItem.DictionaryItem(
                 id              = safeId,
                 number          = strongsNumber,
                 word            = title ?: "",
                 transliteration = transliteration ?: "",
-                definition      = definition ?: ""
+                definition      = definition ?: "",
+                pronunciation   = pronunciation ?: "",
+                kjvUsage        = kjvUsage ?: "",
+                source          = dictionarySource ?: "",
             )
         // Announcement / timer — must have announcementText (may be "")
         announcementText != null -> toAnnouncementItem(safeId, announcementText)
@@ -149,7 +152,8 @@ internal fun ScheduleItem.toDto(): ScheduleItemDto = when (this) {
     )
     is ScheduleItem.DictionaryItem -> ScheduleItemDto(
         id = id, type = "dictionary", displayText = displayText,
-        text = "$word ($transliteration): $definition"
+        // An imported entry has no transliteration to put in brackets.
+        text = (if (transliteration.isBlank()) word else "$word ($transliteration)") + ": $definition"
     )
     is ScheduleItem.CueItem -> ScheduleItemDto(
         id = id, type = "cue", displayText = displayText, text = absoluteTime

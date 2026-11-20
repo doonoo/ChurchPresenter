@@ -283,6 +283,21 @@ class ScheduleTabScreenshotTest {
     )
 
     @Test
+    fun `dictionary rows from Strong's, an imported dictionary and a lexicon`() = shoot(
+        "dictionary_rows",
+        seed = {
+            addDictionary(StrongsEntry("G26", "ἀγάπη", "agápē", "ag-ah'-pay", "love, affection"))
+            addDictionary(
+                StrongsEntry(
+                    "dict-eastons:Aaron", "Aaron", "", "", "The eldest son of Amram and Jochebed, a daughter of Levi.",
+                    source = "Easton's Bible Dictionary",
+                ),
+            )
+            addDictionary(StrongsEntry("G26", "", "", "", "affection, good-will, love", source = "Thayer's"))
+        },
+    )
+
+    @Test
     fun `an empty schedule`() = shoot("empty", seed = {})
 
     @Test

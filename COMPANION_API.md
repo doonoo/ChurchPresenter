@@ -126,6 +126,9 @@ registers them; `{name}` is a path parameter.
 | `GET /api/dictionary` | API key | — | Strong's search |
 | `GET /api/dictionary/{number}` | API key | — | One Strong's entry |
 | `GET /api/dictionary/{number}/verses` | API key | — | Verses a Strong's number appears in |
+| `GET /api/dictionary/{number}/lexicons` | API key | — | What each imported lexicon says of a Strong's number |
+| `GET /api/dictionaries` | API key | — | Dictionaries and lexicons imported in the Dictionary tab |
+| `GET /api/dictionaries/{id}` | API key | — | Search one imported dictionary |
 
 ### Presentations, pictures, media and backgrounds
 
@@ -737,7 +740,21 @@ curl -k -X POST https://192.168.1.10:8765/api/schedule/add \
 curl -k -X POST https://192.168.1.10:8765/api/schedule/add \
   -H "Content-Type: application/json" \
   -d '{"item":{"mediaUrl":"/Users/…/worship.mp4","mediaTitle":"Worship Loop","mediaType":"local"}}'
+
+# Strong's dictionary entry
+curl -k -X POST https://192.168.1.10:8765/api/schedule/add \
+  -H "Content-Type: application/json" \
+  -d '{"item":{"strongsNumber":"G26","title":"ἀγάπη","transliteration":"agápē","definition":"love"}}'
+
+# An imported dictionary's entry: its key and its dictionary, from GET /api/dictionaries/{id}
+curl -k -X POST https://192.168.1.10:8765/api/schedule/add \
+  -H "Content-Type: application/json" \
+  -d '{"item":{"strongsNumber":"dict-eastons:Aaron","title":"Aaron","definition":"The eldest son of Amram.","dictionarySource":"Easton'"'"'s Bible Dictionary"}}'
 ```
+
+A dictionary item is recognised by `strongsNumber`, which carries a Strong's number or an imported
+entry's `key`. `title` is the word; `transliteration`, `definition`, `pronunciation`, `kjvUsage` and
+`dictionarySource` (an imported entry's `source`, which the output names it by) are optional.
 
 **Success** (user clicked Allow):
 ```json
@@ -1254,6 +1271,41 @@ references in that scope first. `503 {"error":"bible not loaded"}` without a Bib
 { "number": "H430", "total": 2602,
   "verses": [ { "bookName": "Genesis", "chapter": 1, "verse": 1, "reference": "Genesis 1:1", "text": "In the beginning…" } ] }
 ```
+
+### `GET /api/dictionary/{number}/lexicons`
+
+What each lexicon imported in the Dictionary tab says of a Strong's number, e.g.
+`/api/dictionary/G26/lexicons` — the entry sheet's "In your lexicons". An array of imported entries
+(below), empty when no lexicon has the number.
+
+## Imported Dictionaries
+
+The dictionaries and lexicons the operator imported in the Dictionary tab (Easton's, Thayer's, BDB…).
+
+### `GET /api/dictionaries`
+
+```json
+[ { "id": "dict-eastons", "name": "Easton's Bible Dictionary", "language": "en", "entryCount": 3963, "isLexicon": false },
+  { "id": "dict-thayer-s", "name": "Thayer's", "language": "", "entryCount": 5624, "isLexicon": true } ]
+```
+
+`isLexicon` is true for a dictionary keyed by Strong's numbers.
+
+### `GET /api/dictionaries/{id}`
+
+Searches one imported dictionary: `q` (default `""`, every entry) matches the headword, key,
+transliteration or definition, ignoring case; `limit` (default `100`). `404 {"error":"dictionary not
+found"}` for an unknown id.
+
+```json
+[ { "key": "dict-eastons:Aaron", "word": "Aaron", "transliteration": "", "pronunciation": "",
+    "definition": "The eldest son of Amram…", "kjvUsage": "", "source": "Easton's Bible Dictionary",
+    "reference": "Easton's Bible Dictionary" } ]
+```
+
+`reference` is what the output's reference line shows — the dictionary's name, with the Strong's
+number for a lexicon (`"G26 · Thayer's"`). To show or schedule an entry, send its `key` as
+`strongsNumber` and its `source` as `dictionarySource` (see `POST /api/schedule/add`).
 
 ---
 
